@@ -1,0 +1,1 @@
+pbpaste > ~/dotfiles/README.md
