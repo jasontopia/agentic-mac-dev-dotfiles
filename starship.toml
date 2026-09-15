@@ -1,0 +1,13 @@
+[username]
+disabled = true
+
+[hostname]
+disabled = true
+
+[directory]
+truncation_length = 1
+truncate_to_repo = true
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
