@@ -1,34 +1,33 @@
 { pkgs, ... }:
-{
-  system.primaryUser = "admin";
-  nix.enable = false;
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.hostPlatform = "aarch64-darwin";
 
-  # macOS 系统偏好设置
+{
+  # Nix-Darwin 基础设置
+  system.stateVersion = 4;
+  nix.settings.experimental-features = "nix-command flakes";
+
+  # macOS 系统偏好声明
   system.defaults = {
-    NSGlobalDomain.AppleInterfaceStyle = "Dark";
-    NSGlobalDomain.InitialKeyRepeat = 15;
-    NSGlobalDomain.KeyRepeat = 2;
     dock.autohide = true;
     finder.AppleShowAllExtensions = true;
+    NSGlobalDomain.AppleInterfaceStyle = "Dark";
   };
 
-  # 声明式 Homebrew 软件与 CLI 工具
+  # Homebrew 声明式软件包列表
   homebrew = {
     enable = true;
-    brews = [
-      "neovim"   # Kun 的核心代码编辑器
-      "ripgrep"  # 高吞吐文本搜索工具 rg
-      "fd"       # 高吞吐文件搜索工具
-      "herdr"    # Agent 时代终端多路复用器 (正确名称: herdr)
-    ];
+    onActivation.cleanup = "zap";
     casks = [
-      "wezterm"  # GPU 加速极速终端
+      "wezterm"
+      "font-hack-nerd-font"
     ];
-    onActivation.autoUpdate = true;
-    onActivation.upgrade = true;
+    brews = [
+      "neovim"
+      "starship"
+      "ripgrep"
+      "fd"
+      "zsh-autosuggestions"
+      "gh"
+      "herdr"
+    ];
   };
-
-  system.stateVersion = 4;
 }
