@@ -1,5 +1,5 @@
-# First Mate & Agent Tools PATH
-export PATH="$HOME/dotfiles/firstmate/bin:$HOME/dotfiles/treehouse/bin:$HOME/dotfiles/no-mistakes/bin:$HOME/dotfiles/quota-axi/bin:$PATH"
+# Agent Tools PATH (Supports both Root & bin directories)
+export PATH="$HOME/dotfiles/firstmate/bin:$HOME/dotfiles/treehouse:$HOME/dotfiles/treehouse/bin:$HOME/dotfiles/no-mistakes:$HOME/dotfiles/no-mistakes/bin:$HOME/dotfiles/quota-axi:$HOME/dotfiles/quota-axi/bin:$PATH"
 
 # Starship Prompt
 eval "$(starship init zsh)"

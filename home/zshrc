@@ -1,0 +1,18 @@
+# Agent Tools PATH
+export PATH="$HOME/dotfiles/firstmate/bin:$PATH"
+
+# Starship Prompt
+eval "$(starship init zsh)"
+
+# Zsh Autosuggestions
+source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh 2>/dev/null || true
+
+# High-Leverage AI Agent Aliases
+alias cc="claude --dangerously-skip-permissions"
+alias co="codex --full-auto"
+
+# General Workflow Aliases
+alias v="nvim"
+alias g="git"
+alias h="herdr"
+alias reload="source ~/.zshrc"
