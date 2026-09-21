@@ -1,37 +1,58 @@
-{ pkgs, ... }:
+{ user, ... }:
 
 {
-  # 1. 禁用 nix-darwin 对 Nix 原生 Daemon 的管理 (适配 Determinate)
+  # Determinate already manages the Nix daemon, so nix-darwin shouldn't.
   nix.enable = false;
 
-  # 2. 显式声明 Mac CPU 架构
-  nixpkgs.hostPlatform = "aarch64-darwin";
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.hostPlatform = "aarch64-darwin"; # use x86_64-darwin for Intel CPU
 
-  # 3. 声明当前 Mac 主用户名
-  system.primaryUser = "admin";
-
-  # 4. Zsh Shell 与系统状态版本
-  programs.zsh.enable = true;
-  system.stateVersion = 4;
-
-  # 5. Homebrew 声明式依赖列表 (补全 herdr 及全量软件)
+  system.primaryUser = user;
+  users.users.${user} = {
+    home = "/Users/${user}";
+  };
+  system.stateVersion = 6;
+  system.defaults = {
+    NSGlobalDomain = {
+      AppleInterfaceStyle = "Dark";
+      KeyRepeat = 2;          # fast key repeat
+      InitialKeyRepeat = 15;  # short delay before repeat
+      _HIHideMenuBar = true;  # auto-hide the menu bar
+      AppleShowAllExtensions = true;
+    };
+    dock.autohide = true;
+    finder.FXPreferredViewStyle = "Nlsv";  # list view by default
+    finder.CreateDesktop = false;          # clean desktop
+    trackpad.Clicking = true;              # tap to click
+  };
+  nix-homebrew = {
+    enable = true;
+    inherit user;
+    # This Mac already had Homebrew in /opt/homebrew before nix-homebrew took over.
+    autoMigrate = true;
+  };
   homebrew = {
     enable = true;
-    onActivation.cleanup = "uninstall";
+    onActivation.cleanup = "zap";  # remove anything not listed here
+    onActivation.autoUpdate = true;
+    onActivation.extraFlags = [ "--force" ];
+    taps = [
+      "kunchenguid/tap"
+      "nikitabobko/tap"
+    ];
     brews = [
       "herdr"
-      "neovim"
-      "ripgrep"
-      "fd"
-      "go"
-      "pnpm"
-      "zsh-autosuggestions"
-      "starship"
+      # firstmate's universal toolchain: gh for GitHub, node for the npm-installed axi tools
       "gh"
+      "node"
+      "p7zip"
     ];
     casks = [
       "wezterm"
-      "font-hack-nerd-font"
+      "claude-code"
+      "font-sarasa-gothic"  # CJK fallback font for WezTerm
+      "kunchenguid/tap/baby-menu"
+      "nikitabobko/tap/aerospace"
     ];
   };
 }
