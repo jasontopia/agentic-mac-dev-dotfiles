@@ -190,6 +190,7 @@ docs/               搭建时的调研笔记
 - 第一次打开 `nvim` 会从 GitHub 拉 lazy.nvim 和插件，需要联网一次，之后可离线使用
 - `home/.claude/hooks/herdr-agent-state.sh` 是 herdr 生成的脚本，入库是为了新机器开箱可用；herdr 升级时会改写它，改动会出现在 `git diff` 里
 - flake 的 host 名是 `mac`，改名的话 `flake.nix`、`bootstrap.sh`、`rebuild.sh` 三处都要同步
+- `configuration.nix` 里有一个**只针对 Neovim** 的 overlay：0.12.5 合进了 nixpkgs master 但没有 backport 到 26.05，所以单独从 `nixpkgs-unstable` 取这一个包，其余全部留在 26.05。等 26.05 跟上之后，删掉这个 overlay 和 `flake.nix` 里的 `nixpkgs-unstable` 输入即可
 
 ---
 

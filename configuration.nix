@@ -1,4 +1,4 @@
-{ user, ... }:
+{ user, nixpkgs-unstable, ... }:
 
 {
   # Determinate already manages the Nix daemon, so nix-darwin shouldn't.
@@ -6,6 +6,18 @@
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = "aarch64-darwin"; # use x86_64-darwin for Intel CPU
+  # Neovim only: 0.12.5 is on nixpkgs master with no 26.05 backport, so take
+  # this one package from unstable. The system is read back off the package set
+  # itself, so this stays correct on Intel too. Drop the overlay once 26.05
+  # catches up with Neovim.
+  nixpkgs.overlays = [
+    (final: prev: {
+      neovim = (import nixpkgs-unstable {
+        system = prev.stdenv.hostPlatform.system;
+        config.allowUnfree = true;
+      }).neovim;
+    })
+  ];
 
   system.primaryUser = user;
   users.users.${user} = {
