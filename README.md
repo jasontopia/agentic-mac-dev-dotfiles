@@ -1,26 +1,62 @@
-# dotfiles
+# AgenticMac
 
-Jasontopia 的 Mac 配置，基于 [Kun 的 dotfiles](https://github.com/kunchenguid/dotfiles)，用 nix-darwin 和 home-manager 管理。
-结构和设置以 Kun 的原版为准，在上面叠加少量个人设置（见"与 Kun 原版的差异"）。
-目标：一台新 Mac 执行一次 `./bootstrap.sh`，软件和所有配置都恢复成一模一样。
+一套**专为 macOS 打造的 Agentic 开发环境**：用 nix-darwin + home-manager 把系统设置、软件清单、终端、编辑器、以及 AI Agent（Claude Code / Codex / Pi / opencode）的配置全部声明在一个仓库里。
 
-## What you get
+目标很简单：**一台全新的 Mac，`git clone` 之后跑一次 `./bootstrap.sh`，就得到一台和现在一模一样的机器。**
 
-执行一次 switch 会配置好：
+之后每次改配置，都是改仓库里的文件，再跑一次 `./rebuild.sh`。机器上不留任何「手点出来的」状态。
 
-- 系统设置（深色模式、按键重复、Dock、Finder、触控板）
-- Homebrew 应用（casks 和 CLI 工具）
-- Nix 用户包（ripgrep、fd、fzf、jq、lazygit、Neovim、Hack Nerd Font）
-- Shell（zsh、别名、starship 提示符、自动补全建议）
-- 编辑器（Neovim，rose-pine moon 主题）
-- 终端（WezTerm，rose-pine moon 主题，中文回退字体）
-- Agent 配置（Claude、Codex、opencode 共用一份 `home/AGENTS.md`）
-- herdr 配置，以及 herdr 的 Claude 会话 hook
-- 可选的 Pi 主题、本地扩展和设置
+> 仅支持 macOS（默认 Apple Silicon）。本项目基于 [Kun 的 dotfiles](https://github.com/kunchenguid/dotfiles) 重构而来，详见文末[致谢](#致谢与来源)。
 
-## Fresh-machine setup
+---
 
-前提：Apple Silicon Mac。Intel Mac 需要把 `configuration.nix` 里的 `nixpkgs.hostPlatform` 改成 `"x86_64-darwin"`。
+## 这是什么
+
+大多数 dotfiles 只管 `~/.zshrc` 这类点文件，装软件还得自己 `brew install`，系统设置还得自己去「系统设置」里点。
+
+AgenticMac 把三层一起管起来：
+
+| 层 | 由谁声明 | 例子 |
+|---|---|---|
+| **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
+| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、aerospace、ripgrep、fd、fzf、neovim、字体 |
+| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、Claude/Codex/Pi 的 agent 配置 |
+
+三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
+
+---
+
+## 你会得到什么
+
+跑完一次 switch，这些东西全部就位：
+
+**系统与终端**
+- macOS 系统偏好：深色模式、快速按键重复、自动隐藏菜单栏和 Dock、显示文件扩展名、Finder 列表视图、干净桌面、轻点即点击
+- [WezTerm](https://wezfurlong.org/wezterm/)：rose-pine moon 主题、半透明 + 毛玻璃背景、失焦窗口自动变暗（一眼看出焦点在哪）、Hack Nerd Font + 更纱黑体中文回退
+- zsh：历史记录幽灵补全（`Ctrl+F` 接受）、语法高亮、一组高频别名
+- [starship](https://starship.rs/) 提示符：只显示当前文件夹名，在 git 仓库里显示仓库名 + 分支 + 状态 + 上条命令耗时
+
+**编辑器**
+- Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
+- snacks.nvim 文件/全文/buffer 检索与跳转定义、oil.nvim 文件浏览、neogit + diffview + gitsigns（行级 blame）、which-key 提示
+- `Esc` 直接保存，`<leader>f/s/b/e/g` 分别是找文件、搜内容、切 buffer、文件浏览、Git
+
+**Agent 环境（这套配置的重点）**
+- **一份 `home/AGENTS.md` 作为全局 Agent 规范**，通过符号链接同时供给 Claude Code（`~/.claude/CLAUDE.md`）、Codex（`~/.codex/AGENTS.md`）、opencode（`~/.config/opencode/AGENTS.md`）。改一处，三个 agent 同时生效
+- Claude Code：dark-ansi 主题、全屏 TUI、状态栏显示当前模型和上下文使用百分比、SessionStart hook 接入 herdr、auto mode 的环境描述
+- herdr 多路复用器：tmux 风格键位（`Ctrl+B` 前缀 + `hjkl` 切 pane），Agents 面板按 space 分组
+- Pi：rose-pine moon 主题、安静启动、折叠思考块、自带 **Calm 扩展**（隐藏内置工具的噪音输出、折叠 thinking、底部一艘慢慢开的小船表示正在工作），以及终端标题状态扩展
+- `cc` / `co` 别名一键进入 Claude Code / Codex 的高权限模式
+
+**可复现性**
+- `flake.lock` 锁死 nixpkgs / nix-darwin / home-manager / nix-homebrew 的版本，今天和半年后 build 出来的是同一套
+- `tests/` 下有 Pi Calm 扩展的完整测试（渲染、生命周期、持久化、tmux 里的真实 TUI 验证）
+
+---
+
+## 快速开始
+
+**前提**：一台 macOS（默认 Apple Silicon）。Intel Mac 把 `configuration.nix` 里的 `nixpkgs.hostPlatform` 改成 `"x86_64-darwin"`。
 
 ```sh
 git clone https://github.com/jasontopia/dotfiles.git ~/dotfiles
@@ -28,9 +64,16 @@ cd ~/dotfiles
 ./bootstrap.sh
 ```
 
-`bootstrap.sh` 按顺序做四件事：安装 Determinate Nix、把本仓库软链接到 `~/.dotfiles`、校验 `flake.nix` 里的 `user`、执行第一次 `darwin-rebuild switch`。
+`bootstrap.sh` 按顺序做四件事：
 
-只校验、不应用：
+1. 安装 [Determinate Nix](https://determinate.systems/)（已装则跳过）
+2. 把本仓库软链接到 `~/.dotfiles`（`home.nix` 里的路径都从这里解析）
+3. 校验 `flake.nix` 里的 `user =` 和你的 macOS 用户名是否一致，不一致会询问并帮你改
+4. 执行第一次 `darwin-rebuild switch`
+
+过程中需要输入 `sudo` 密码，所以要在真正的终端窗口里运行。
+
+只想验证配置、不实际应用：
 
 ```sh
 nix flake check --no-build
@@ -39,15 +82,52 @@ nix build .#darwinConfigurations.mac.system --dry-run
 
 ### 在已经用过的机器上第一次 switch
 
-- **Homebrew 会被清理**：没写进 `configuration.nix` 的 Homebrew 包会被卸载（见下方 cleanup warning）。
-  neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font 改由 Nix 提供，brew 版被卸掉是正常的。
-- **链接目标不能是真实文件**：home-manager 不会覆盖已存在的文件或文件夹。
-  如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc` 等已经是真实文件，先移走再 switch，否则激活会失败。
-  herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr。
-- **Claude Code 只用 Homebrew cask**：不要再用 `npm install -g @anthropic-ai/claude-code`，它会占用 `/opt/homebrew/bin/claude`，导致 cask 安装失败。
-- `sudo` 需要真正的终端输入密码，`./rebuild.sh` 要在普通终端窗口里运行。
+这几条会咬人，先看完再跑：
 
-## Daily use
+- **Homebrew 会被清理**：`onActivation.cleanup = "zap"`，没写进 `configuration.nix` 的 Homebrew 包会被卸载。neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font 这些改由 Nix 提供，brew 版被卸掉是预期行为
+- **链接目标不能是已存在的真实文件**：home-manager 不会覆盖已有的文件或文件夹。如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc` 已经是真实文件，先移走再 switch。herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr
+- **Claude Code 只走 Homebrew cask**：不要用 `npm install -g @anthropic-ai/claude-code`，它会占住 `/opt/homebrew/bin/claude` 导致 cask 安装失败
+- 本机之前已有 Homebrew 的话，`nix-homebrew.autoMigrate = true` 会接管它；全新机器可以把这行去掉
+
+---
+
+## 需要你自己配置的东西
+
+仓库刻意不声明这些，因为它们要么是私密信息，要么应该独立升级：
+
+| 事项 | 怎么做 |
+|---|---|
+| Git 身份 | `git config --global user.name/user.email`，本配置不代管 |
+| 用户名 | `flake.nix` 里唯一一行 `user = "..."`，`bootstrap.sh` 会提示你改 |
+| Agent 登录 | Claude Code / Codex / Pi 各自首次启动时登录 |
+| Agent 工具链 | 见下一节，按官方方式从上游安装 |
+| 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
+
+---
+
+## Agent 工具链
+
+这些工具**不由本仓库声明也不 vendor**，各自按官方文档从上游安装，独立升级。本仓库只负责系统层。npm 工具用 Homebrew 装的 `node`。
+
+| 工具 | 安装方式 | 用途 |
+|---|---|---|
+| [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
+| [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池，装到 `~/.local/bin` |
+| [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁，装到 `~/.local/bin` |
+| gh-axi / chrome-devtools-axi / tasks-axi / quota-axi | `npm install -g <tool>` | firstmate 必需 |
+| lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，可选 |
+| [gnhf](https://github.com/kunchenguid/gnhf) | `npm install -g gnhf` | 通宵自主迭代 |
+| [backpass](https://github.com/kunchenguid/backpass) | `npm install -g backpass acpx` | 从会话记录训练 `AGENTS.md` |
+
+axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检查 PATH 上的二进制和版本下限。
+在 `~/firstmate` 里跑 `bin/fm-bootstrap.sh`，没有 `MISSING` 输出即表示工具链齐全。
+在 firstmate 之外，也可以用 `npx skills add kunchenguid/<tool> --skill <skill> -g` 把它们装成 Agent Skill。
+
+`~/.local/bin` 已经由 `home.nix` 加进 PATH。
+
+---
+
+## 日常使用
 
 直接改仓库里的配置文件，然后：
 
@@ -55,52 +135,80 @@ nix build .#darwinConfigurations.mac.system --dry-run
 ./rebuild.sh
 ```
 
-`home/` 下的文件通过 `mkOutOfStoreSymlink` 链接到位（`~/.config/nvim` → `home/.config/nvim` 等），改完立即生效，不需要 rebuild。
-改了 `configuration.nix`（软件清单、系统设置）或 `home.nix`（Nix 包、zsh 别名、starship、环境变量、链接列表）时，才需要跑 `./rebuild.sh`。
+**什么时候需要 rebuild：**
 
-**Homebrew cleanup warning:** `configuration.nix` 设置了 `homebrew.onActivation.cleanup = "zap"`。
-每次 switch 都会卸载所有没写在 `brews`/`casks` 里的 Homebrew 包。新装 Homebrew 软件时，先把它加进 `configuration.nix`。
+| 改了什么 | 需要 rebuild 吗 |
+|---|---|
+| `home/` 下的配置文件（nvim、wezterm、herdr、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
+| `configuration.nix`（软件清单、系统设置） | 需要 |
+| `home.nix`（Nix 包、zsh 别名、starship、环境变量、链接列表） | 需要 |
 
-**Git identity:** 和 Kun 一样，本配置不设置 git 的 name/email，需要自己用 `git config --global` 设置一次。
+**装新软件**：先写进 `configuration.nix` 的 `brews`/`casks`（或 `home.nix` 的 `home.packages`），再 `./rebuild.sh`。直接 `brew install` 的东西会在下次 switch 时被 zap 掉。
 
-**Heads-up:** `cc` 和 `co` 别名分别是 `claude --dangerously-skip-permissions` 和 `codex --full-auto`，权限很高，清楚用途再用。
+---
 
-## Agent toolchain
+## 仓库结构
 
-和 Kun 的设计一致：这些工具**不由本仓库声明或 vendor**，而是按各自官方文档从上游安装。
-本仓库只负责系统层，工具本身各自独立升级。npm 工具用的是 Homebrew 装的 `node`。
+```
+flake.nix           版本锁定（nixpkgs / nix-darwin / home-manager / nix-homebrew）+ 唯一的 user 配置
+flake.lock          实际锁定的 revision
+configuration.nix   系统层：macOS defaults、Homebrew taps/brews/casks
+home.nix            用户层：Nix 包、zsh、starship、环境变量、所有符号链接
+home/               真实的配置文件，被链接到 ~ 下
+  AGENTS.md           全局 Agent 规范（Claude / Codex / opencode 共用）
+  .config/nvim/       Neovim + lazy.nvim
+  .config/wezterm/    WezTerm
+  .config/herdr/      herdr 键位与 UI
+  .claude/            Claude Code 设置与 hook
+  .pi/agent/          Pi 主题、扩展、模型覆盖
+bootstrap.sh        新机器一次性初始化
+rebuild.sh          日常 switch
+tests/              Pi Calm 扩展的测试
+docs/               搭建时的调研笔记
+```
 
-| 工具 | 安装方式 | 用途 |
-|---|---|---|
-| [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
-| [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池（装到 `~/.local/bin`） |
-| [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁（装到 `~/.local/bin`） |
-| gh-axi / chrome-devtools-axi / tasks-axi / quota-axi | `npm install -g <tool>` | firstmate 必需 |
-| lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，可选 |
-| [gnhf](https://github.com/kunchenguid/gnhf) | `npm install -g gnhf` | 通宵自主迭代 |
-| [backpass](https://github.com/kunchenguid/backpass) | `npm install -g backpass acpx` | 从会话记录训练 `AGENTS.md` |
+---
 
-axi 工具必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检查 PATH 上的二进制和版本下限。
-在 firstmate 之外，还可以按 Kun 的推荐用 `npx skills add kunchenguid/<tool> --skill <skill> -g` 装成 Agent Skill。
-在 `~/firstmate` 里运行 `bin/fm-bootstrap.sh`，没有 `MISSING` 输出即表示工具链齐全。
+## 设计取舍
 
-## 与 Kun 原版的差异
+想改这套东西之前，先看看这几条是**有意为之**的：
 
-- `flake.nix`：`user = "admin"`。
-- `configuration.nix`：`nix-homebrew.autoMigrate = true`（本机原先已有 Homebrew）；额外的 taps `kunchenguid/tap`、`nikitabobko/tap`；额外的 brews `gh`、`node`、`p7zip`、`go`、`pnpm`；额外的 casks `font-sarasa-gothic`、`baby-menu`、`aerospace`。
-- `home.nix`：额外的 `v`/`g`/`h`/`reload` 别名、UTF-8 locale、`~/.local/bin` 进 PATH、starship 只显示当前文件夹（git 仓库里显示仓库名）、链接 herdr 的 Claude hook。
-- `home/.config/wezterm/wezterm.lua`：字体增加 Sarasa Term SC 作为中文回退。
-- `home/.config/herdr/config.toml`：`onboarding = false`。
-- `home/.claude/settings.json`：在 Kun 的设置上增加 `tui`、`skipDangerousModePermissionPrompt`、herdr 的 `SessionStart` hook 和 auto mode 环境说明。
-- `home/.claude/hooks/herdr-agent-state.sh`：herdr 生成的 hook 脚本，放进仓库以便新机器直接可用。herdr 更新时会改写它，改动会出现在 `git diff` 里。
-- `home/AGENTS.md`：我自己的全局 Agent 规范。
-- `.gitignore`：额外忽略 herdr 的运行时文件和 `.env`。
-- `docs/`：复刻 Kun 环境时的调研笔记。
+- **`homebrew.onActivation.cleanup = "zap"`**：强制「所有 Homebrew 包都必须写进配置」的习惯，机器才是真正可复现的。不要软化成 `uninstall` 或 `none`
+- **配置文件用 `mkOutOfStoreSymlink` 而不是拷进 Nix store**：改 nvim 配置不该需要 rebuild。代价是这些文件不受 Nix 版本管理，好处是编辑体验和普通 dotfiles 一样
+- **一份 `AGENTS.md` 供多个 agent 共用**：规范只有一份，不会漂移
+- **Agent 工具链不进配置**：它们迭代太快，锁进 flake 只会让你永远在改版本号。系统层稳定，工具层自由
+- **不管 git 身份、不管密钥**：仓库是公开的
+- **Pi 的凭据和运行时状态不入库**：`home.nix` 只链接「作者写的」文件和目录，`auth.json`、`calm` 状态文件都留在本地
 
-## Notes
+更多面向 agent 的项目约定见 [`AGENTS.md`](AGENTS.md)。
 
-第一次打开 `nvim` 时会从 GitHub 拉取 [lazy.nvim](https://github.com/folke/lazy.nvim) 和插件，需要联网一次，之后可离线使用。
+---
+
+## 注意事项
+
+- `cc` 和 `co` 别名分别是 `claude --dangerously-skip-permissions` 和 `codex --full-auto`，权限很高，清楚用途再用
+- 第一次打开 `nvim` 会从 GitHub 拉 lazy.nvim 和插件，需要联网一次，之后可离线使用
+- `home/.claude/hooks/herdr-agent-state.sh` 是 herdr 生成的脚本，入库是为了新机器开箱可用；herdr 升级时会改写它，改动会出现在 `git diff` 里
+- flake 的 host 名是 `mac`，改名的话 `flake.nix`、`bootstrap.sh`、`rebuild.sh` 三处都要同步
+
+---
+
+## 致谢与来源
+
+AgenticMac 基于 [**Kun Chen**](https://github.com/kunchenguid) 的 [dotfiles](https://github.com/kunchenguid/dotfiles) 重构而来。整体架构（nix-darwin + home-manager + nix-homebrew 三层分工、`mkOutOfStoreSymlink` 的编辑即生效、bootstrap/rebuild 两个脚本的划分、以及「agent 工具链不进配置」的取舍）都来自 Kun 的原版设计。
+
+相关上游项目：
+
+- [kunchenguid/dotfiles](https://github.com/kunchenguid/dotfiles) - 本项目的直接来源
+- [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate) - Agent distro
+- [kunchenguid/no-mistakes](https://github.com/kunchenguid/no-mistakes) - push 前验证门禁
+- [kunchenguid/treehouse](https://github.com/kunchenguid/treehouse) - worktree 池
+- [kunchenguid/axi](https://github.com/kunchenguid/axi) - agent 工效学设计规范
+
+`tests/pi-calm.test.sh` 改编自 Firstmate 的 Calm 测试套件（MIT）。
+
+在此基础上，本仓库做了这些改动：中文文档、更纱黑体中文回退、WezTerm 失焦变暗、starship 只显示当前目录、UTF-8 locale、herdr 的 Claude SessionStart hook、Pi Calm 扩展与测试、以及一份自己的全局 `AGENTS.md`。
 
 ## License
 
-来自 Kun 原版的部分遵循 MIT No Attribution，见 `LICENSE`。
+来自 Kun 原版的部分遵循 MIT No Attribution，见 [`LICENSE`](LICENSE)。
