@@ -61,6 +61,11 @@ in
         error_symbol = "[❯](red)";
       };
       cmd_duration.format = "[$duration]($style) ";
+      # show only the current folder (or the repo name inside a git repo)
+      directory = {
+        truncation_length = 1;
+        truncate_to_repo = true;
+      };
     };
   };
 
