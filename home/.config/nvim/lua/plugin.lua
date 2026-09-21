@@ -4,5 +4,8 @@ if not vim.uv.fs_stat(lazypath) then
     'https://github.com/folke/lazy.nvim.git', '--branch=stable', lazypath })
 end
 vim.opt.rtp:prepend(lazypath)
-require('lazy').setup('plugins')  -- load every file in lua/plugins/
-
+require('lazy').setup('plugins', {  -- load every file in lua/plugins/
+  -- Nothing here needs luarocks, so skip the hererocks bootstrap lazy would
+  -- otherwise try to install (and the checkhealth errors when it can't).
+  rocks = { enabled = false },
+})
