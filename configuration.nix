@@ -46,6 +46,9 @@
       "gh"
       "node"
       "p7zip"
+      # language toolchains I still use directly
+      "go"
+      "pnpm"
     ];
     casks = [
       "wezterm"
