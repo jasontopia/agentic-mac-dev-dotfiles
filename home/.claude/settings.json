@@ -25,14 +25,14 @@
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: PUBLIC — jasontopia/dotfiles (github.com:jasontopia/dotfiles.git) is public; any push there is publishing",
+      "**Repository visibility**: PUBLIC — jasontopia/agentic-mac-dev-dotfiles (github.com:jasontopia/agentic-mac-dev-dotfiles.git) is public; any push there is publishing",
       "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
       "**Secrets management**: None configured",
-      "**Default / protected branches**: main (default); no classic protected branches or rulesets listed via gh for jasontopia/dotfiles",
+      "**Default / protected branches**: main (default); no classic protected branches or rulesets listed via gh for jasontopia/agentic-mac-dev-dotfiles",
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
       "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine or CI runner with open internet",
-      "**Source control**: The trusted repo (jasontopia/dotfiles) and its origin remote only (no additional orgs configured)",
+      "**Source control**: The trusted repo (jasontopia/agentic-mac-dev-dotfiles) and its origin remote only (no additional orgs configured)",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
@@ -44,7 +44,7 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: personal dotfiles / Mac system configuration management (nix-darwin, home-manager)",
-      "**Trusted repo**: jasontopia/dotfiles (public) at /Users/admin/dotfiles and its origin remote (github.com:jasontopia/dotfiles.git) — since public, only this repo's own work belongs here; confidential/secret material is never cleared into it by visibility",
+      "**Trusted repo**: jasontopia/agentic-mac-dev-dotfiles (public) at /Users/admin/dotfiles and its origin remote (github.com:jasontopia/agentic-mac-dev-dotfiles.git) — since public, only this repo's own work belongs here; confidential/secret material is never cleared into it by visibility",
       "**Org-specific CLIs**: None configured"
     ]
   }

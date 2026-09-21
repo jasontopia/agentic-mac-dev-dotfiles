@@ -1,4 +1,4 @@
-# AgenticMac
+# Agentic Mac Dev Dotfiles
 
 一套**专为 macOS 打造的 Agentic 开发环境**：用 nix-darwin + home-manager 把系统设置、软件清单、终端、编辑器、以及 AI Agent（Claude Code / Codex / Pi / opencode）的配置全部声明在一个仓库里。
 
@@ -14,7 +14,7 @@
 
 大多数 dotfiles 只管 `~/.zshrc` 这类点文件，装软件还得自己 `brew install`，系统设置还得自己去「系统设置」里点。
 
-AgenticMac 把三层一起管起来：
+这套配置把三层一起管起来：
 
 | 层 | 由谁声明 | 例子 |
 |---|---|---|
@@ -59,7 +59,7 @@ AgenticMac 把三层一起管起来：
 **前提**：一台 macOS（默认 Apple Silicon）。Intel Mac 把 `configuration.nix` 里的 `nixpkgs.hostPlatform` 改成 `"x86_64-darwin"`。
 
 ```sh
-git clone https://github.com/jasontopia/dotfiles.git ~/dotfiles
+git clone https://github.com/jasontopia/agentic-mac-dev-dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./bootstrap.sh
 ```
@@ -195,7 +195,7 @@ docs/               搭建时的调研笔记
 
 ## 致谢与来源
 
-AgenticMac 基于 [**Kun Chen**](https://github.com/kunchenguid) 的 [dotfiles](https://github.com/kunchenguid/dotfiles) 重构而来。整体架构（nix-darwin + home-manager + nix-homebrew 三层分工、`mkOutOfStoreSymlink` 的编辑即生效、bootstrap/rebuild 两个脚本的划分、以及「agent 工具链不进配置」的取舍）都来自 Kun 的原版设计。
+本项目基于 [**Kun Chen**](https://github.com/kunchenguid) 的 [dotfiles](https://github.com/kunchenguid/dotfiles) 重构而来。整体架构（nix-darwin + home-manager + nix-homebrew 三层分工、`mkOutOfStoreSymlink` 的编辑即生效、bootstrap/rebuild 两个脚本的划分、以及「agent 工具链不进配置」的取舍）都来自 Kun 的原版设计。
 
 相关上游项目：
 
