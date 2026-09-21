@@ -59,15 +59,15 @@
 **前提**：一台 macOS（默认 Apple Silicon）。Intel Mac 把 `configuration.nix` 里的 `nixpkgs.hostPlatform` 改成 `"x86_64-darwin"`。
 
 ```sh
-git clone https://github.com/jasontopia/agentic-mac-dev-dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/jasontopia/agentic-mac-dev-dotfiles.git ~/agentic-mac-dev-dotfiles
+cd ~/agentic-mac-dev-dotfiles
 ./bootstrap.sh
 ```
 
 `bootstrap.sh` 按顺序做四件事：
 
 1. 安装 [Determinate Nix](https://determinate.systems/)（已装则跳过）
-2. 把本仓库软链接到 `~/.dotfiles`（`home.nix` 里的路径都从这里解析）
+2. 把本仓库软链接到 `~/.dotfiles`（`home.nix` 里的路径都从这里解析，所以 clone 到哪个目录名都可以）
 3. 校验 `flake.nix` 里的 `user =` 和你的 macOS 用户名是否一致，不一致会询问并帮你改
 4. 执行第一次 `darwin-rebuild switch`
 
