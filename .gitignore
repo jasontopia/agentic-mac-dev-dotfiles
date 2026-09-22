@@ -4,6 +4,8 @@ home/.config/herdr/session.json
 home/.config/herdr/*.sock
 home/.config/herdr/.plugins.lock
 home/.config/herdr/release-notes.json
+# disposable herdr sessions created by tests/pi-calm.test.sh
+home/.config/herdr/sessions/
 
 # macOS + nix build noise
 .DS_Store

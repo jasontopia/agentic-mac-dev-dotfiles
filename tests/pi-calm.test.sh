@@ -17,7 +17,10 @@
 #   degradation with one clear diagnostic;
 # - working ship: geometry, cadence, colors, resize, narrow fallback,
 #   freeze/resume, timer disposal, extension lifecycle;
-# - real Pi 0.82 TUI proofs in tmux without credentials or provider calls.
+# - real Pi TUI proofs in an isolated headless herdr session, without
+#   credentials or provider calls. herdr cannot set a pane's terminal size,
+#   so the narrow-fallback reflow stays covered in process by the working
+#   ship test rather than end to end here.
 set -u
 
 # shellcheck source=tests/lib.sh
@@ -26,12 +29,19 @@ set -u
 TMP_ROOT=$(dotfiles_test_tmproot pi-calm)
 CALM_DIR="$ROOT/home/.pi/agent/extensions/calm"
 PI_PACKAGE_DIR=${PI_CALM_TEST_PACKAGE_DIR:-"$(npm root -g 2>/dev/null)/@earendil-works/pi-coding-agent"}
-TMUX_SOCKET="pi-calm-test-$$"
-TMUX_SESSION="pi-calm-e2e"
+# herdr session names allow only ASCII letters, digits, '.', '_' and '-'.
+HERDR_TEST_SESSION="picalm$$"
 
 cleanup() {
-  if command -v tmux >/dev/null 2>&1; then
-    tmux -L "$TMUX_SOCKET" kill-server 2>/dev/null || true
+  if command -v herdr >/dev/null 2>&1; then
+    HERDR_SESSION="$HERDR_TEST_SESSION" herdr session stop "$HERDR_TEST_SESSION" \
+      >/dev/null 2>&1 || true
+    HERDR_SESSION="$HERDR_TEST_SESSION" herdr session delete "$HERDR_TEST_SESSION" \
+      >/dev/null 2>&1 || true
+    # herdr roots session directories under its config directory, which this
+    # repo owns through a Home Manager symlink. Drop the directory once it is
+    # empty so a test run leaves nothing untracked behind.
+    rmdir "$HOME/.config/herdr/sessions" 2>/dev/null || true
   fi
   if [ "${KEEP_TMP:-}" = 1 ]; then
     printf 'kept disposable Pi Calm evidence: %s\n' "$TMP_ROOT" >&2
@@ -40,20 +50,6 @@ cleanup() {
   dotfiles_test_cleanup
 }
 trap cleanup EXIT
-
-wait_for_text() {
-  local file=$1 text=$2 i=0
-  while [ "$i" -lt 120 ]; do
-    # Include recent scrollback: expanding a long restored transcript can move
-    # the asserted tool output above the current viewport while the footer and
-    # editor remain visible.
-    tmux -L "$TMUX_SOCKET" capture-pane -p -t "$TMUX_SESSION" -S -600 >"$file" 2>/dev/null || true
-    grep -Fq "$text" "$file" 2>/dev/null && return 0
-    sleep 0.05
-    i=$((i + 1))
-  done
-  return 1
-}
 
 find_chrome() {
   local candidate
@@ -586,25 +582,40 @@ JS
 }
 
 test_real_pi_tui_smoke() {
-  local fixture agent project socket pane i
-  if ! command -v pi >/dev/null 2>&1 || ! command -v tmux >/dev/null 2>&1; then
-    echo "skip: pi or tmux not found for isolated real TUI smoke"
+  local fixture agent project pane pane_text pi_version i
+  if ! command -v pi >/dev/null 2>&1 \
+    || ! command -v herdr >/dev/null 2>&1 \
+    || ! command -v jq >/dev/null 2>&1; then
+    echo "skip: pi, herdr or jq not found for isolated real TUI smoke"
     return 0
   fi
-  [ "$(pi --version 2>/dev/null || true)" = "0.82.0" ] \
-    || fail "real Pi smoke requires the installed Pi 0.82.0 proof target"
+  # Record the Pi this proof ran against instead of gating on one release. The
+  # adapters Calm installs are probed at runtime and degrade loudly on their
+  # own, so a pinned version only rots and hides the whole proof behind a skip.
+  pi_version=$(pi --version 2>/dev/null || true)
+  [ -n "$pi_version" ] || fail "real Pi smoke could not read the installed Pi version"
 
   fixture="$TMP_ROOT/tui-smoke"
   agent="$fixture/agent"
   project="$fixture/project"
-  socket="pi-calm-smoke-$$"
   mkdir -p "$agent/extensions" "$project" "$fixture/captures" "$fixture/sessions"
+
+  # Every herdr call in this proof targets the disposable session, never the
+  # developer's live one.
+  hd() { HERDR_SESSION="$HERDR_TEST_SESSION" herdr "$@"; }
+
+  read_pane() {
+    # Recent scrollback, not just the viewport: a long transcript can push the
+    # asserted text above the visible rows while the footer stays on screen.
+    hd pane read "$pane" --format text --lines 200 >"$1" 2>/dev/null || true
+  }
+
   capture_tui() {
     local label=$1
-    tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" >"$fixture/captures/$label.current.txt" 2>/dev/null || true
-    tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" -S -100 >"$fixture/captures/$label.scrollback.txt" 2>/dev/null || true
-    tmux -L "$socket" capture-pane -ep -t "$TMUX_SESSION" >"$fixture/captures/$label.current.ansi.txt" 2>/dev/null || true
-    tmux -L "$socket" capture-pane -ep -t "$TMUX_SESSION" -S -100 >"$fixture/captures/$label.scrollback.ansi.txt" 2>/dev/null || true
+    hd pane read "$pane" --format text --lines 200 \
+      >"$fixture/captures/$label.scrollback.txt" 2>/dev/null || true
+    hd pane read "$pane" --format ansi --lines 200 \
+      >"$fixture/captures/$label.scrollback.ansi.txt" 2>/dev/null || true
   }
   cp -R "$CALM_DIR" "$agent/extensions/"
   cat >"$project/provider.ts" <<'TS'
@@ -656,58 +667,75 @@ export default function (pi: ExtensionAPI): void {
 }
 TS
 
-  tmux -L "$socket" new-session -d -s "$TMUX_SESSION" -x 100 -y 30 \
-    "cd '$project' && env PI_CODING_AGENT_DIR='$agent' PI_CODING_AGENT_SESSION_DIR='$fixture/sessions' PI_OFFLINE=1 CALM_SMOKE_MARKERS='$fixture/provider-markers.txt' pi --approve --no-context-files --no-skills --no-prompt-templates -e ./provider.ts"
-  for i in $(seq 1 120); do
-    tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" -S -100 >"$fixture/pane" 2>/dev/null || true
+  # A private headless server keeps this proof off the developer's live herdr
+  # session: its own socket, its own workspace, torn down by cleanup.
+  HERDR_SESSION="$HERDR_TEST_SESSION" herdr server >"$fixture/herdr-server.log" 2>&1 &
+  for i in $(seq 1 200); do
+    hd session list 2>/dev/null | grep -Eq "^$HERDR_TEST_SESSION[[:space:]]+running" && break
+    sleep 0.05
+  done
+  hd session list 2>/dev/null | grep -Eq "^$HERDR_TEST_SESSION[[:space:]]+running" \
+    || fail "real Pi smoke could not start an isolated herdr session"
+
+  pane=$(hd workspace create 2>/dev/null | jq -r '.result.root_pane.pane_id // empty')
+  [ -n "$pane" ] || fail "real Pi smoke could not create an isolated herdr pane"
+
+  # pane run types a command line into the pane's shell, so hand it one bare
+  # path: an inline command would be re-split by that shell's own quoting.
+  cat >"$fixture/launch.sh" <<EOF
+#!/bin/sh
+cd '$project' || exit 1
+exec env PI_CODING_AGENT_DIR='$agent' \
+  PI_CODING_AGENT_SESSION_DIR='$fixture/sessions' \
+  PI_OFFLINE=1 \
+  CALM_SMOKE_MARKERS='$fixture/provider-markers.txt' \
+  pi --approve --no-context-files --no-skills --no-prompt-templates -e ./provider.ts
+EOF
+  chmod +x "$fixture/launch.sh"
+  hd pane run "$pane" "$fixture/launch.sh" >/dev/null 2>&1
+
+  for i in $(seq 1 200); do
+    read_pane "$fixture/pane"
     grep -Fq 'provider.ts' "$fixture/pane" && break
     sleep 0.05
   done
   grep -Fq 'provider.ts' "$fixture/pane" || fail "real Pi smoke did not load the disposable provider"
   capture_tui ready
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" -l '/calm'
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" Enter
+  hd pane send-text "$pane" '/calm' >/dev/null 2>&1
+  hd pane send-keys "$pane" Enter >/dev/null 2>&1
   sleep 0.2
   capture_tui after-calm
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" -l '/calm-smoke'
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" Enter
-  for i in $(seq 1 120); do
+  hd pane send-text "$pane" '/calm-smoke' >/dev/null 2>&1
+  hd pane send-keys "$pane" Enter >/dev/null 2>&1
+  for i in $(seq 1 300); do
     if [ -f "$fixture/provider-markers.txt" ] && grep -Fq 'stream-start' "$fixture/provider-markers.txt"; then
-      capture_tui working-wide
-      tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" -S -100 >"$fixture/wide" 2>/dev/null || true
-      grep -Fq '\__/' "$fixture/wide" && break
+      capture_tui working
+      read_pane "$fixture/working"
+      grep -Fq '\__/' "$fixture/working" && break
     fi
     sleep 0.02
   done
   grep -Fq 'stream-start' "$fixture/provider-markers.txt" || fail "real Pi smoke did not enter the provider stream"
-  grep -Fq '\__/' "$fixture/wide" || fail "real Pi smoke did not show Calm's wide working boat"
-  tmux -L "$socket" resize-window -t "$TMUX_SESSION" -x 40 -y 30
-  for i in $(seq 1 120); do
-    capture_tui working-narrow
-    tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" -S -100 >"$fixture/narrow" 2>/dev/null || true
-    grep -Fq '\__/' "$fixture/narrow" && break
-    grep -Fq 'stream-done' "$fixture/provider-markers.txt" 2>/dev/null && break
-    sleep 0.02
-  done
-  grep -Fq '\__/' "$fixture/narrow" || fail "real Pi smoke did not reflow Calm's working boat on resize"
-  for i in $(seq 1 120); do
-    tmux -L "$socket" capture-pane -p -t "$TMUX_SESSION" -S -100 >"$fixture/pane" 2>/dev/null || true
+  # herdr panes have no settable terminal size, so the narrow reflow this proof
+  # used to drive stays covered in process by test_working_ship_and_lifecycle.
+  grep -Fq '\__/' "$fixture/working" || fail "real Pi smoke did not show Calm's working boat"
+  for i in $(seq 1 200); do
+    read_pane "$fixture/pane"
     grep -Fq 'CALM_SMOKE_GENUINE_ASSISTANT' "$fixture/pane" && break
     sleep 0.05
   done
-  pane=$(cat "$fixture/pane")
-  assert_contains "$pane" 'CALM_SMOKE_GENUINE_USER' "real Pi smoke hid a genuine user prompt"
-  assert_contains "$pane" 'CALM_SMOKE_GENUINE_ASSISTANT' "real Pi smoke hid genuine assistant text"
+  pane_text=$(cat "$fixture/pane")
+  assert_contains "$pane_text" 'CALM_SMOKE_GENUINE_USER' "real Pi smoke hid a genuine user prompt"
+  assert_contains "$pane_text" 'CALM_SMOKE_GENUINE_ASSISTANT' "real Pi smoke hid genuine assistant text"
   [ "$(cat "$agent/calm")" = on ] || fail "real Pi smoke did not persist Calm on"
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" -l '/calm'
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" Enter
+  hd pane send-text "$pane" '/calm' >/dev/null 2>&1
+  hd pane send-keys "$pane" Enter >/dev/null 2>&1
   sleep 0.15
   [ "$(cat "$agent/calm")" = off ] || fail "real Pi smoke did not persist Calm off"
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" -l '/quit'
-  tmux -L "$socket" send-keys -t "$TMUX_SESSION" Enter
+  hd pane send-text "$pane" '/quit' >/dev/null 2>&1
+  hd pane send-keys "$pane" Enter >/dev/null 2>&1
   sleep 0.1
-  tmux -L "$socket" kill-server 2>/dev/null || true
-  pass "isolated Pi 0.82 TUI proves auto-load, /calm persistence, resize-safe working animation, and genuine transcript text without credentials"
+  pass "isolated Pi $pi_version TUI in herdr proves auto-load, /calm persistence, the working animation, and genuine transcript text without credentials"
 }
 
 test_zero_coupling_and_state_file

@@ -50,7 +50,7 @@
 
 **可复现性**
 - `flake.lock` 锁死 nixpkgs / nix-darwin / home-manager / nix-homebrew 的版本，今天和半年后 build 出来的是同一套
-- `tests/` 下有 Pi Calm 扩展的完整测试（渲染、生命周期、持久化、tmux 里的真实 TUI 验证）
+- `tests/` 下有 Pi Calm 扩展的完整测试（渲染、生命周期、持久化、隔离 herdr 会话里的真实 TUI 验证）
 
 ---
 
