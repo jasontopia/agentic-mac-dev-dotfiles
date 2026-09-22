@@ -95,7 +95,11 @@ export default function (pi: ExtensionAPI) {
     applyWorkingPresentation(ctx.ui, true);
     ctx.ui.setHiddenThinkingLabel(calmPresentationIsActive() ? "" : undefined);
     removeTerminalInputHandler?.();
-    removeTerminalInputHandler = ctx.ui.onTerminalInput((data) => {
+    // Declared `undefined` on purpose: this handler observes the submit key and
+    // never consumes or rewrites input, and Pi's TerminalInputHandler returns
+    // `{ consume?, data? } | undefined`. Annotating it keeps an accidental
+    // return from silently starting to swallow the user's keystrokes.
+    removeTerminalInputHandler = ctx.ui.onTerminalInput((data): undefined => {
       if (!getKeybindings().matches(data, "tui.input.submit")) return;
 
       const input = ctx.ui.getEditorText().trim();
