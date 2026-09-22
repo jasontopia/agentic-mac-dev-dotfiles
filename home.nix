@@ -16,6 +16,9 @@ in
     jq        # json on the command line
     lazygit
     neovim
+    # tsc typechecks the Calm extension against the installed Pi's types
+    # in tests/pi-calm.test.sh
+    typescript
     # the font everything renders in
     nerd-fonts.hack
   ];

@@ -111,6 +111,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 
 | 工具 | 安装方式 | 用途 |
 |---|---|---|
+| [pi](https://github.com/earendil-works/pi) | `npm install -g @earendil-works/pi-coding-agent` | Agent harness。`home.nix` 链接的 Pi 主题/扩展/模型配置和 `tests/` 都需要它 |
 | [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
 | [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池，装到 `~/.local/bin` |
 | [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁，装到 `~/.local/bin` |
