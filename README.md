@@ -19,8 +19,8 @@
 | 层 | 由谁声明 | 例子 |
 |---|---|---|
 | **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
-| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、ripgrep、fd、fzf、neovim、字体 |
-| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、borders、Claude/Codex/Pi 的 agent 配置 |
+| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、Baby Menu、ripgrep、fd、fzf、neovim、字体 |
+| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、git、Neovim、WezTerm、herdr、borders、Baby Menu 自制组件、Claude/Codex/Pi 的 agent 配置 |
 
 三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
 
@@ -36,6 +36,8 @@
 - zsh：历史记录幽灵补全（`Ctrl+F` 接受）、语法高亮、一组高频别名
 - [starship](https://starship.rs/) 提示符：只显示当前文件夹名，在 git 仓库里显示仓库名 + 分支 + 状态 + 上条命令耗时
 - [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 只靠标题栏深浅表示窗口焦点，堆叠多窗口时几乎看不出来，borders 给焦点窗口描一圈边补上这个。Catppuccin Mocha 蓝配色，由 launchd agent 在登录时拉起
+- [Baby Menu](https://github.com/kunchenguid/baby-menu)：菜单栏已经自动隐藏，日常要瞄一眼的信息改由它承载。仓库带两个自制组件：`claude-code-quota`（Claude Code 周额度用量，运行时从 macOS Keychain 读 token，不存任何凭据）和 `system-usage`（CPU / 内存实时占用，只在面板打开时刷新）
+- git：`core.quotepath = false` + UTF-8 的 `i18n`，中文文件名和中文 commit message 不再显示成转义码
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
@@ -86,7 +88,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 这几条会咬人，先看完再跑：
 
 - **Homebrew 会被清理**：`onActivation.cleanup = "zap"`，没写进 `configuration.nix` 的 Homebrew 包会被卸载。neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font 这些改由 Nix 提供，brew 版被卸掉是预期行为
-- **链接目标不能是已存在的真实文件**：home-manager 不会覆盖已有的文件或文件夹。如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc` 已经是真实文件，先移走再 switch。herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr
+- **链接目标不能是已存在的真实文件**：home-manager 不会覆盖已有的文件或文件夹。如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc`、`~/.config/git/config`、`~/.config/git/ignore`、`~/.baby-menu/extensions/{claude-code-quota,system-usage}` 已经是真实文件，先移走再 switch。herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr
 - **Claude Code 只走 Homebrew cask**：不要用 `npm install -g @anthropic-ai/claude-code`，它会占住 `/opt/homebrew/bin/claude` 导致 cask 安装失败
 - 本机之前已有 Homebrew 的话，`nix-homebrew.autoMigrate = true` 会接管它；全新机器可以把这行去掉
 
@@ -98,7 +100,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 
 | 事项 | 怎么做 |
 |---|---|
-| Git 身份 | `git config --global user.name/user.email`，本配置不代管 |
+| Git 身份 | `git config --global user.name/user.email`，本配置不代管（只有身份不代管；`quotepath`/UTF-8 那些非身份配置在 `home/.config/git/config` 里） |
 | 用户名 | `flake.nix` 里唯一一行 `user = "..."`，`bootstrap.sh` 会提示你改 |
 | Agent 登录 | Claude Code / Codex / Pi 各自首次启动时登录 |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
@@ -146,7 +148,7 @@ axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检
 
 | 改了什么 | 需要 rebuild 吗 |
 |---|---|
-| `home/` 下的配置文件（nvim、wezterm、herdr、borders、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
+| `home/` 下的配置文件（nvim、wezterm、herdr、borders、git、claude、pi、baby-menu、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
 | `configuration.nix`（软件清单、系统设置） | 需要 |
 | `home.nix`（Nix 包、zsh 别名、starship、环境变量、链接列表） | 需要 |
 
@@ -167,8 +169,10 @@ home/               真实的配置文件，被链接到 ~ 下
   .config/wezterm/    WezTerm
   .config/herdr/      herdr 键位与 UI
   .config/borders/    JankyBorders 焦点边框
+  .config/git/        非身份的 git 配置 + 全局 ignore
   .claude/            Claude Code 设置与 hook
   .pi/agent/          Pi 主题、扩展、模型覆盖
+  .baby-menu/         Baby Menu 自制组件（claude-code-quota、system-usage）
 bootstrap.sh        新机器一次性初始化
 rebuild.sh          日常 switch
 tests/              Pi Calm 扩展的测试
@@ -197,6 +201,8 @@ docs/               搭建时的调研笔记
 - `cc` 和 `co` 别名分别是 `claude --dangerously-skip-permissions` 和 `codex --full-auto`，权限很高，清楚用途再用
 - 第一次打开 `nvim` 会从 GitHub 拉 lazy.nvim 和插件，需要联网一次，之后可离线使用
 - `home/.claude/hooks/herdr-agent-state.sh` 是 herdr 生成的脚本，入库是为了新机器开箱可用；herdr 升级时会改写它，改动会出现在 `git diff` 里
+- **git 有两个全局配置文件，`~/.gitconfig` 会盖掉仓库版**：git 先读 `~/.config/git/config`（本仓库管），再读 `~/.gitconfig`（本地管身份），后者在冲突时胜出。所以两边的键必须互不重叠：别在 `~/.gitconfig` 里重复写 `quotepath` 之类的东西，否则改仓库不生效
+- **Baby Menu 只链自制组件，不链整个 `extensions` 目录**：该目录里的 `hello-world`、`recipes`、`AGENTS.md`、`babymenu-env.d.ts` 是 app 自带模板，每次启动都会被重写，整个目录链上去会和 app 打架
 - flake 的 host 名是 `mac`，改名的话 `flake.nix`、`bootstrap.sh`、`rebuild.sh` 三处都要同步
 - `configuration.nix` 里有一个**只针对 Neovim** 的 overlay：0.12.5 合进了 nixpkgs master 但没有 backport 到 26.05，所以单独从 `nixpkgs-unstable` 取这一个包，其余全部留在 26.05。等 26.05 跟上之后，删掉这个 overlay 和 `flake.nix` 里的 `nixpkgs-unstable` 输入即可
 
@@ -216,7 +222,7 @@ docs/               搭建时的调研笔记
 
 `tests/pi-calm.test.sh` 改编自 Firstmate 的 Calm 测试套件（MIT）。
 
-在此基础上，本仓库做了这些改动：中文文档、更纱黑体中文回退、WezTerm 失焦变暗、starship 只显示当前目录、UTF-8 locale、herdr 的 Claude SessionStart hook、Pi Calm 扩展与测试、以及一份自己的全局 `AGENTS.md`。
+在此基础上，本仓库做了这些改动：中文文档、更纱黑体中文回退、WezTerm 失焦变暗、starship 只显示当前目录、UTF-8 locale 与配套的 git `quotepath`/`i18n` 配置、herdr 的 Claude SessionStart hook、JankyBorders 焦点环、两个自制 Baby Menu 组件、Pi Calm 扩展与测试、以及一份自己的全局 `AGENTS.md`。
 
 ## License
 
