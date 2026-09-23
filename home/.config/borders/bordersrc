@@ -7,8 +7,11 @@
 # later run against a live process updates the border in place, so after an
 # edit just run this file again - no restart, no rebuild.
 #
-# Colours are rose-pine moon, the palette WezTerm, Neovim and Pi already use:
-# iris for the focused window, muted for the rest. Format is 0xAARRGGBB.
+# Colours are Catppuccin Mocha (blue + overlay0) rather than the rose-pine moon
+# iris the rest of this machine uses: at width 5 the focus ring is furniture,
+# not syntax, so it reads better as a cold accent than as another palette
+# colour. Catppuccin's blue is bright without being saturated, which is what
+# makes a ring this thick bearable to look at all day. Format is 0xAARRGGBB.
 # Full option list: man borders
 
 options=(
@@ -16,8 +19,8 @@ options=(
 	width=5.0
 	# This machine drives a 1920x1080 display at 1:1, so retina drawing is off.
 	hidpi=off
-	active_color=0xffc4a7e7   # rose-pine moon iris
-	inactive_color=0xff6e6a86 # rose-pine moon muted
+	active_color=0xff89b4fa   # catppuccin mocha blue
+	inactive_color=0xff6c7086 # catppuccin mocha overlay0
 )
 
 borders "${options[@]}"
