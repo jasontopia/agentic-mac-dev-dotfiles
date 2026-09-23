@@ -37,7 +37,7 @@
 - [starship](https://starship.rs/) 提示符：只显示当前文件夹名，在 git 仓库里显示仓库名 + 分支 + 状态 + 上条命令耗时
 - [AeroSpace](https://github.com/nikitabobko/AeroSpace) 平铺窗口管理器：官方默认配置为基线，去掉了会全局抢占 alt 键的 26 个字母工作区绑定
 - [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 不画焦点框，平铺之后没有任何东西告诉你键盘焦点在哪块，borders 补的就是这个。Catppuccin Mocha 蓝配色，由 launchd agent 在登录时拉起
-- [SketchyBar](https://github.com/FelixKratz/SketchyBar)：系统菜单栏已经被隐藏，这条是它的替身。左边是 AeroSpace 的 9 个工作区加当前应用名，右边是音量和时间；rose-pine moon 配色，当前工作区高亮成和焦点框同一个蓝色，同样由 launchd agent 在登录时拉起
+- [SketchyBar](https://github.com/FelixKratz/SketchyBar)：系统菜单栏已经被隐藏，这条是它的替身。左边只有当前 AeroSpace 工作区（一个蓝色小方块，和焦点框同色），右边是内存、CPU、音量三个数；rose-pine moon 配色，同样由 launchd agent 在登录时拉起。刻意不显示时间和当前应用名
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题

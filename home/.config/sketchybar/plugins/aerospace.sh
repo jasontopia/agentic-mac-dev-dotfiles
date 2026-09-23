@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# Highlights the workspace pill AeroSpace just moved focus to.
+# The bar shows only the workspace that has focus, so this one item is the
+# whole left side.
 #
-# $1 is the workspace this item stands for, baked in when sketchybarrc created
-# it. $FOCUSED_WORKSPACE arrives with the aerospace_workspace_change event that
-# aerospace.toml's exec-on-workspace-change fires.
-source "$CONFIG_DIR/colors.sh"
+# $FOCUSED_WORKSPACE arrives with the aerospace_workspace_change event that
+# aerospace.toml's exec-on-workspace-change fires. On the item's first run
+# nothing has fired yet, so ask AeroSpace directly.
+WS="$FOCUSED_WORKSPACE"
+[ -n "$WS" ] || WS=$(aerospace list-workspaces --focused 2>/dev/null)
 
-if [ "$1" = "$FOCUSED_WORKSPACE" ]; then
-	sketchybar --set "$NAME" background.drawing=on label.color="$BASE"
+if [ -n "$WS" ]; then
+	sketchybar --set "$NAME" label="$WS" drawing=on
 else
-	sketchybar --set "$NAME" background.drawing=off label.color="$MUTED"
+	# AeroSpace is not running. An empty blue pill would claim a focus that does
+	# not exist, so draw nothing at all.
+	sketchybar --set "$NAME" drawing=off
 fi
