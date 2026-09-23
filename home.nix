@@ -88,6 +88,15 @@ in
   home.file.".claude/hooks/herdr-agent-state.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/hooks/herdr-agent-state.sh";
 
+  # Link the hand-written baby-menu widgets one directory at a time. The rest of
+  # ~/.baby-menu/extensions (hello-world, recipes, AGENTS.md, babymenu-env.d.ts)
+  # is Baby Menu's own template, which the app rewrites on launch, so linking the
+  # whole extensions directory would fight it.
+  home.file.".baby-menu/extensions/claude-code-quota".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.baby-menu/extensions/claude-code-quota";
+  home.file.".baby-menu/extensions/system-usage".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.baby-menu/extensions/system-usage";
+
   # Keep Pi's credential and runtime state local by linking only authored files and directories.
   home.file.".pi/agent/themes".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/themes";
