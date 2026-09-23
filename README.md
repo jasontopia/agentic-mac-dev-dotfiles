@@ -19,7 +19,7 @@
 | 层 | 由谁声明 | 例子 |
 |---|---|---|
 | **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
-| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、Baby Menu、ripgrep、fd、fzf、neovim、字体 |
+| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、Baby Menu、Chrome/Brave、ChatGPT、ripgrep、fd、fzf、neovim、字体 |
 | **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、git、Neovim、WezTerm、herdr、borders、Baby Menu 自制组件、Claude/Codex/Pi 的 agent 配置 |
 
 三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
@@ -38,6 +38,7 @@
 - [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 只靠标题栏深浅表示窗口焦点，堆叠多窗口时几乎看不出来，borders 给焦点窗口描一圈边补上这个。Catppuccin Mocha 蓝配色，由 launchd agent 在登录时拉起
 - [Baby Menu](https://github.com/kunchenguid/baby-menu)：菜单栏已经自动隐藏，日常要瞄一眼的信息改由它承载。仓库带两个自制组件：`claude-code-quota`（Claude Code 周额度用量，运行时从 macOS Keychain 读 token，不存任何凭据）和 `system-usage`（CPU / 内存实时占用，只在面板打开时刷新）
 - git：`core.quotepath = false` + UTF-8 的 `i18n`，中文文件名和中文 commit message 不再显示成转义码
+- GUI 应用：Chrome、Brave、ChatGPT（同时提供 Codex CLI）、Typeless（语音输入）、UURemote 都由 cask 声明，不用手动去官网下
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
@@ -90,6 +91,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 - **Homebrew 会被清理**：`onActivation.cleanup = "zap"`，没写进 `configuration.nix` 的 Homebrew 包会被卸载。neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font 这些改由 Nix 提供，brew 版被卸掉是预期行为
 - **链接目标不能是已存在的真实文件**：home-manager 不会覆盖已有的文件或文件夹。如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc`、`~/.config/git/config`、`~/.config/git/ignore`、`~/.baby-menu/extensions/{claude-code-quota,system-usage}` 已经是真实文件，先移走再 switch。herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr
 - **Claude Code 只走 Homebrew cask**：不要用 `npm install -g @anthropic-ai/claude-code`，它会占住 `/opt/homebrew/bin/claude` 导致 cask 安装失败
+- **已经手动装过的 GUI 应用会被 cask 接管**：Chrome、Brave、ChatGPT、Typeless、UURemote 如果已经在 `/Applications` 里，cask 安装默认会因为「App 已存在」而失败。`onActivation.extraFlags = [ "--force" ]` 正是为此存在，第一次 switch 时 brew 会直接接管它们
 - 本机之前已有 Homebrew 的话，`nix-homebrew.autoMigrate = true` 会接管它；全新机器可以把这行去掉
 
 ---

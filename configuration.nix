@@ -66,6 +66,14 @@
       "claude-code"
       "font-sarasa-gothic"  # CJK fallback font for WezTerm
       "kunchenguid/tap/baby-menu"
+      # GUI apps that were installed by hand until now. They are not in Nixpkgs
+      # as macOS apps, and being outside Homebrew meant `zap` could not see them
+      # either, so they quietly stayed off the reproducible path.
+      "google-chrome"
+      "brave-browser"
+      "chatgpt"       # also provides the Codex CLI at Contents/Resources/codex
+      "typeless"      # voice dictation; runs as a login item
+      "uuremote"
     ];
   };
 }
