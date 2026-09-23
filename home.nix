@@ -93,6 +93,14 @@ in
   home.file.".claude/hooks/herdr-agent-state.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/hooks/herdr-agent-state.sh";
 
+  # The Codex CLI ships inside the ChatGPT app bundle and nothing puts it on
+  # PATH, which left the `co` alias above dead since it was inherited. Link it
+  # into ~/.local/bin, which home.sessionPath already exports. Dangles if the
+  # chatgpt cask is ever dropped from configuration.nix - that is the intent.
+  home.file.".local/bin/codex".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "/Applications/ChatGPT.app/Contents/Resources/codex";
+
   # Non-identity git config only. Identity lives in ~/.gitconfig, which this
   # repo does not manage - git reads both files and ~/.gitconfig wins, so the
   # two sets must stay disjoint.
