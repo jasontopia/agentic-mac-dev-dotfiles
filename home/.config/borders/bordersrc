@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# JankyBorders draws the focus ring macOS does not, which is what makes
+# AeroSpace's tiling legible: without it nothing on screen says which tile has
+# the keyboard.
+#
+# borders reads and executes this file when it starts with no arguments. A
+# later run against a live process updates the border in place, so after an
+# edit just run this file again - no restart, no rebuild.
+#
+# Colours are rose-pine moon, the palette WezTerm, Neovim and Pi already use:
+# iris for the focused window, muted for the rest. Format is 0xAARRGGBB.
+# Full option list: man borders
+
+options=(
+	style=round
+	width=5.0
+	# This machine drives a 1920x1080 display at 1:1, so retina drawing is off.
+	hidpi=off
+	active_color=0xffc4a7e7   # rose-pine moon iris
+	inactive_color=0xff6e6a86 # rose-pine moon muted
+)
+
+borders "${options[@]}"

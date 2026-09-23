@@ -16,6 +16,8 @@ in
     jq        # json on the command line
     lazygit
     neovim
+    # the focus ring macOS does not draw, which is what makes AeroSpace legible
+    jankyborders
     # tsc typechecks the Calm extension against the installed Pi's types
     # in tests/pi-calm.test.sh
     typescript
@@ -83,6 +85,8 @@ in
   # directory is its own to write into.
   home.file.".config/aerospace/aerospace.toml".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/aerospace/aerospace.toml";
+  home.file.".config/borders/bordersrc".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/borders/bordersrc";
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude/hooks/herdr-agent-state.sh".source =
@@ -104,4 +108,19 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+
+  # Run borders as a login agent rather than through `brew services`, so the
+  # machine stays a product of this repo. No arguments: that is what makes
+  # borders read ~/.config/borders/bordersrc, which is linked out of here.
+  # launchd hands an agent a bare PATH, so bordersrc's own `borders` call needs
+  # the package on it explicitly.
+  launchd.agents.borders = {
+    enable = true;
+    config = {
+      ProgramArguments = [ "${pkgs.jankyborders}/bin/borders" ];
+      EnvironmentVariables.PATH = "${pkgs.jankyborders}/bin:/usr/bin:/bin";
+      RunAtLoad = true;
+      KeepAlive = true;
+    };
+  };
 }

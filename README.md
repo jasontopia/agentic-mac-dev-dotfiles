@@ -20,7 +20,7 @@
 |---|---|---|
 | **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
 | **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、aerospace、ripgrep、fd、fzf、neovim、字体 |
-| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、aerospace、Claude/Codex/Pi 的 agent 配置 |
+| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、aerospace、borders、Claude/Codex/Pi 的 agent 配置 |
 
 三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
 
@@ -35,7 +35,8 @@
 - [WezTerm](https://wezfurlong.org/wezterm/)：rose-pine moon 主题、半透明 + 毛玻璃背景、失焦窗口自动变暗（一眼看出焦点在哪）、Hack Nerd Font + 更纱黑体中文回退
 - zsh：历史记录幽灵补全（`Ctrl+F` 接受）、语法高亮、一组高频别名
 - [starship](https://starship.rs/) 提示符：只显示当前文件夹名，在 git 仓库里显示仓库名 + 分支 + 状态 + 上条命令耗时
-- [AeroSpace](https://github.com/nikitabobko/AeroSpace) 平铺窗口管理器：目前是官方默认配置原样入库，作为可以往上改的基线
+- [AeroSpace](https://github.com/nikitabobko/AeroSpace) 平铺窗口管理器：官方默认配置为基线，去掉了会全局抢占 alt 键的 26 个字母工作区绑定
+- [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 不画焦点框，平铺之后没有任何东西告诉你键盘焦点在哪块，borders 补的就是这个。rose-pine moon 配色，由 launchd agent 在登录时拉起
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
@@ -142,7 +143,7 @@ axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检
 
 | 改了什么 | 需要 rebuild 吗 |
 |---|---|
-| `home/` 下的配置文件（nvim、wezterm、herdr、aerospace、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
+| `home/` 下的配置文件（nvim、wezterm、herdr、aerospace、borders、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
 | `configuration.nix`（软件清单、系统设置） | 需要 |
 | `home.nix`（Nix 包、zsh 别名、starship、环境变量、链接列表） | 需要 |
 
@@ -163,6 +164,7 @@ home/               真实的配置文件，被链接到 ~ 下
   .config/wezterm/    WezTerm
   .config/herdr/      herdr 键位与 UI
   .config/aerospace/  AeroSpace 平铺窗口管理器
+  .config/borders/    JankyBorders 焦点边框
   .claude/            Claude Code 设置与 hook
   .pi/agent/          Pi 主题、扩展、模型覆盖
 bootstrap.sh        新机器一次性初始化
