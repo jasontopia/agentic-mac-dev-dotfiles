@@ -123,10 +123,15 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，可选 |
 | [gnhf](https://github.com/kunchenguid/gnhf) | `npm install -g gnhf` | 通宵自主迭代 |
 | [backpass](https://github.com/kunchenguid/backpass) | `npm install -g backpass acpx` | 从会话记录训练 `AGENTS.md` |
+| [kun](https://github.com/kunchenguid/kun) | `npx skills add kunchenguid/kun -g -a claude-code -a codex -a opencode -a pi` | `/kun` skill。装进 `~/.agents/skills/`，Claude Code 和 Pi 走符号链接，Codex 和 OpenCode 直接读这个目录 |
 
 axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检查 PATH 上的二进制和版本下限。
 在 `~/firstmate` 里跑 `bin/fm-bootstrap.sh`，没有 `MISSING` 输出即表示工具链齐全。
 在 firstmate 之外，也可以用 `npx skills add kunchenguid/<tool> --skill <skill> -g` 把它们装成 Agent Skill。
+
+`/kun` 的 `SKILL.md` 只有 1 KB，是个壳：每次调用时才从 `raw.githubusercontent.com` 拉 Kun 的 living docs
+（`ENTRY.md` / `TOOLS.md` / `OPINIONS.md` / `VOICE.md`）再照着执行，而那几份文档每天自动重新生成。
+所以它锁不住版本，跑起来也需要联网，这是上游的设计，不是这里的取舍。
 
 `~/.local/bin` 已经由 `home.nix` 加进 PATH。
 
