@@ -53,7 +53,10 @@ in
       pull = "git pull";
       m = "git switch main";
       cc = "claude --dangerously-skip-permissions";
-      co = "codex --full-auto";
+      # codex 0.155 dropped --full-auto. These two flags are the closest thing to
+      # what it meant: never stop to ask, but keep writes inside the workspace
+      # sandbox. Deliberately weaker than cc above, which has no sandbox at all.
+      co = "codex -a never -s workspace-write";
       v = "nvim";
       g = "git";
       h = "herdr";

@@ -51,7 +51,7 @@
 - Claude Code：dark-ansi 主题、全屏 TUI、状态栏显示当前模型和上下文使用百分比、SessionStart hook 接入 herdr、auto mode 的环境描述
 - herdr 多路复用器：tmux 风格键位（`Ctrl+B` 前缀 + `hjkl` 切 pane），Agents 面板按 space 分组
 - Pi：rose-pine moon 主题、安静启动、折叠思考块、自带 **Calm 扩展**（隐藏内置工具的噪音输出、折叠 thinking、底部一艘慢慢开的小船表示正在工作），以及终端标题状态扩展
-- `cc` / `co` 别名一键进入 Claude Code / Codex 的高权限模式
+- `cc` / `co` 别名一键进入 Claude Code / Codex 的高权限模式（`co` 保留工作区沙箱）
 
 **可复现性**
 - `flake.lock` 锁死 nixpkgs / nix-darwin / home-manager / nix-homebrew 的版本，今天和半年后 build 出来的是同一套
@@ -202,7 +202,7 @@ docs/               搭建时的调研笔记
 
 ## 注意事项
 
-- `cc` 和 `co` 别名分别是 `claude --dangerously-skip-permissions` 和 `codex --full-auto`，权限很高，清楚用途再用
+- `cc` = `claude --dangerously-skip-permissions`，完全无防护；`co` = `codex -a never -s workspace-write`，不询问审批但写操作被沙箱限制在工作区内。两者权限都高，清楚用途再用（`co` 刻意比 `cc` 收紧一档）
 - 第一次打开 `nvim` 会从 GitHub 拉 lazy.nvim 和插件，需要联网一次，之后可离线使用
 - `home/.claude/hooks/herdr-agent-state.sh` 是 herdr 生成的脚本，入库是为了新机器开箱可用；herdr 升级时会改写它，改动会出现在 `git diff` 里
 - **git 有两个全局配置文件，`~/.gitconfig` 会盖掉仓库版**：git 先读 `~/.config/git/config`（本仓库管），再读 `~/.gitconfig`（本地管身份），后者在冲突时胜出。所以两边的键必须互不重叠：别在 `~/.gitconfig` 里重复写 `quotepath` 之类的东西，否则改仓库不生效
