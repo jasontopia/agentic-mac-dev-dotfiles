@@ -79,6 +79,10 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
   home.file.".config/herdr".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/herdr";
+  # Link the file, not the directory: AeroSpace owns this config but the
+  # directory is its own to write into.
+  home.file.".config/aerospace/aerospace.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/aerospace/aerospace.toml";
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude/hooks/herdr-agent-state.sh".source =
