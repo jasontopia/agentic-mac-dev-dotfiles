@@ -31,8 +31,13 @@ in
     LANG = "en_US.UTF-8";
     LC_ALL = "en_US.UTF-8";
   };
-  # treehouse and no-mistakes install scripts drop their binaries here
-  home.sessionPath = [ "$HOME/.local/bin" ];
+  # treehouse and no-mistakes install scripts drop their binaries here.
+  # /opt/homebrew/bin is here on purpose rather than left to Homebrew's own
+  # installer: the only things putting it on PATH were /etc/paths.d/homebrew and
+  # a `brew shellenv` line in ~/.zprofile, neither of which this repo declares.
+  # Without it a fresh machine comes up with herdr, node, gh, go, pnpm, pi and
+  # every npm-global agent tool missing from PATH.
+  home.sessionPath = [ "$HOME/.local/bin" "/opt/homebrew/bin" "/opt/homebrew/sbin" ];
 
   programs.zsh = {
     enable = true;

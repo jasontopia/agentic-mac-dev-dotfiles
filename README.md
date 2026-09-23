@@ -39,6 +39,7 @@
 - [Baby Menu](https://github.com/kunchenguid/baby-menu)：菜单栏已经自动隐藏，日常要瞄一眼的信息改由它承载。仓库带两个自制组件：`claude-code-quota`（Claude Code 周额度用量，运行时从 macOS Keychain 读 token，不存任何凭据）和 `system-usage`（CPU / 内存实时占用，只在面板打开时刷新）
 - git：`core.quotepath = false` + UTF-8 的 `i18n`，中文文件名和中文 commit message 不再显示成转义码
 - GUI 应用：Chrome、Brave、ChatGPT（同时提供 Codex CLI）、Typeless（语音输入）、UURemote 都由 cask 声明，不用手动去官网下
+- PATH：`~/.local/bin` 和 `/opt/homebrew/{bin,sbin}` 都由 `home.nix` 声明，不依赖 Homebrew 安装器往 `~/.zprofile` 写的那行 `shellenv`
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
