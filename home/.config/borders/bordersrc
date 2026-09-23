@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# JankyBorders draws the focus ring macOS does not, which is what makes
-# AeroSpace's tiling legible: without it nothing on screen says which tile has
-# the keyboard.
+# JankyBorders draws the focus ring macOS does not. Apple's only cue is a
+# slightly lighter title bar, which disappears the moment two windows of the
+# same app overlap; this says plainly which one has the keyboard.
 #
 # borders reads and executes this file when it starts with no arguments. A
 # later run against a live process updates the border in place, so after an

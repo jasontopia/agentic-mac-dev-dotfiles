@@ -50,7 +50,6 @@
     onActivation.extraFlags = [ "--force" ];
     taps = [
       "kunchenguid/tap"
-      "nikitabobko/tap"
     ];
     brews = [
       "herdr"
@@ -67,7 +66,6 @@
       "claude-code"
       "font-sarasa-gothic"  # CJK fallback font for WezTerm
       "kunchenguid/tap/baby-menu"
-      "nikitabobko/tap/aerospace"
     ];
   };
 }

@@ -19,8 +19,8 @@
 | 层 | 由谁声明 | 例子 |
 |---|---|---|
 | **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
-| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、aerospace、sketchybar、ripgrep、fd、fzf、neovim、字体 |
-| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、aerospace、borders、sketchybar、Claude/Codex/Pi 的 agent 配置 |
+| **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、ripgrep、fd、fzf、neovim、字体 |
+| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、Neovim、WezTerm、herdr、borders、Claude/Codex/Pi 的 agent 配置 |
 
 三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
 
@@ -35,9 +35,7 @@
 - [WezTerm](https://wezfurlong.org/wezterm/)：rose-pine moon 主题、半透明 + 毛玻璃背景、失焦窗口自动变暗（一眼看出焦点在哪）、Hack Nerd Font + 更纱黑体中文回退
 - zsh：历史记录幽灵补全（`Ctrl+F` 接受）、语法高亮、一组高频别名
 - [starship](https://starship.rs/) 提示符：只显示当前文件夹名，在 git 仓库里显示仓库名 + 分支 + 状态 + 上条命令耗时
-- [AeroSpace](https://github.com/nikitabobko/AeroSpace) 平铺窗口管理器：官方默认配置为基线，去掉了会全局抢占 alt 键的 26 个字母工作区绑定
-- [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 不画焦点框，平铺之后没有任何东西告诉你键盘焦点在哪块，borders 补的就是这个。Catppuccin Mocha 蓝配色，由 launchd agent 在登录时拉起
-- [SketchyBar](https://github.com/FelixKratz/SketchyBar)：系统菜单栏已经被隐藏，这条是它的替身。悬浮在顶部，离屏幕三边各 16px，和 AeroSpace 给窗口留的间距一样，所以它看起来是第一块 tile 而不是贴在顶上的装饰条；半透明加毛玻璃，透明度和模糊半径都取 WezTerm 的值，两者是同一种材质。左边只有当前 AeroSpace 工作区（一个蓝色小方块，和焦点框同色），右边是内存、CPU、音量三个数，全白；同样由 launchd agent 在登录时拉起。刻意不显示时间和当前应用名
+- [JankyBorders](https://github.com/FelixKratz/JankyBorders)：macOS 只靠标题栏深浅表示窗口焦点，堆叠多窗口时几乎看不出来，borders 给焦点窗口描一圈边补上这个。Catppuccin Mocha 蓝配色，由 launchd agent 在登录时拉起
 
 **编辑器**
 - Neovim + [lazy.nvim](https://github.com/folke/lazy.nvim)，rose-pine moon 主题
@@ -103,7 +101,6 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | Git 身份 | `git config --global user.name/user.email`，本配置不代管 |
 | 用户名 | `flake.nix` 里唯一一行 `user = "..."`，`bootstrap.sh` 会提示你改 |
 | Agent 登录 | Claude Code / Codex / Pi 各自首次启动时登录 |
-| AeroSpace 权限 | 首次启动要在「系统设置 > 隐私与安全性 > 辅助功能」里手动授权，这一步没法声明 |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
 | 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
 
@@ -149,7 +146,7 @@ axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检
 
 | 改了什么 | 需要 rebuild 吗 |
 |---|---|
-| `home/` 下的配置文件（nvim、wezterm、herdr、aerospace、borders、sketchybar、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效。sketchybar 改完跑一次 `sketchybar --reload` |
+| `home/` 下的配置文件（nvim、wezterm、herdr、borders、claude、pi、AGENTS.md） | **不需要**，它们是 `mkOutOfStoreSymlink` 链接到位的，改完立即生效 |
 | `configuration.nix`（软件清单、系统设置） | 需要 |
 | `home.nix`（Nix 包、zsh 别名、starship、环境变量、链接列表） | 需要 |
 
@@ -169,9 +166,7 @@ home/               真实的配置文件，被链接到 ~ 下
   .config/nvim/       Neovim + lazy.nvim
   .config/wezterm/    WezTerm
   .config/herdr/      herdr 键位与 UI
-  .config/aerospace/  AeroSpace 平铺窗口管理器
   .config/borders/    JankyBorders 焦点边框
-  .config/sketchybar/ SketchyBar 状态栏（sketchybarrc + colors.sh + plugins/）
   .claude/            Claude Code 设置与 hook
   .pi/agent/          Pi 主题、扩展、模型覆盖
 bootstrap.sh        新机器一次性初始化
