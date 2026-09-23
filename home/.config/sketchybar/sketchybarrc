@@ -34,17 +34,30 @@ source "$CONFIG_DIR/colors.sh"
 # CPU icon the pair was unreadable.
 FONT="Hack Nerd Font"
 
-# height 32 with no y_offset keeps the bar flush against the top edge; this is
-# a 1920x1080 display at 1:1, so vertical space is worth more than a floating
-# bar's margins. aerospace.toml's gaps.outer.top is 32 + 16 to match - change
-# one and change the other.
+# A floating bar, not a flush one: margin and y_offset both 16 put the same
+# gap between the bar and the screen edge that aerospace.toml puts between a
+# window and the screen edge, so the bar reads as the first tile rather than
+# as chrome bolted to the top.
+#
+# That stacks up: 16 above the bar + 32 of bar + 16 below it, which is why
+# aerospace.toml's gaps.outer.top is 64. Change the height or either offset
+# here and change that number too.
+#
+# blur_radius plus the alpha in $BAR are what make this the same material as a
+# WezTerm window (window_background_opacity 0.8, macos_window_background_blur
+# 50). The blur is only visible because $BAR is translucent; at full alpha it
+# would be wasted work.
 sketchybar --bar \
 	height=32 \
 	position=top \
 	sticky=on \
+	margin=16 \
+	y_offset=16 \
+	corner_radius=9 \
+	blur_radius=50 \
 	padding_left=6 \
 	padding_right=6 \
-	color="$BASE" \
+	color="$BAR" \
 	shadow=off
 
 sketchybar --default \
@@ -73,7 +86,7 @@ sketchybar --add item workspace left \
 	--set workspace \
 		icon.drawing=off \
 		label.font="$FONT:Bold:13.0" \
-		label.color="$BASE" \
+		label.color="$PILL_TEXT" \
 		label.padding_left=7 \
 		label.padding_right=7 \
 		background.color="$FOCUS" \
@@ -87,24 +100,24 @@ sketchybar --add item workspace left \
 sketchybar --add item volume right \
 	--subscribe volume volume_change \
 	--set volume \
-		icon.color="$IRIS" \
-		label.color="$IRIS" \
+		icon.color="$TEXT" \
+		label.color="$TEXT" \
 		script="$PLUGINS/volume.sh"
 
 sketchybar --add item cpu right \
 	--set cpu \
 		update_freq=3 \
 		icon="" \
-		icon.color="$GOLD" \
-		label.color="$GOLD" \
+		icon.color="$TEXT" \
+		label.color="$TEXT" \
 		script="$PLUGINS/cpu.sh"
 
 sketchybar --add item memory right \
 	--set memory \
 		update_freq=15 \
 		icon="" \
-		icon.color="$FOAM" \
-		label.color="$FOAM" \
+		icon.color="$TEXT" \
+		label.color="$TEXT" \
 		script="$PLUGINS/memory.sh"
 
 # Paint the initial state: every script above runs once here, which is also

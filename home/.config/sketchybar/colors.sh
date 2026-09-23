@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 # The bar's palette, in one place because sketchybarrc paints the initial state
 # and the plugins repaint it later - two copies of these hex values would drift.
-#
-# rose-pine moon, the same scheme WezTerm and Neovim use, so the bar reads as
-# the top edge of the same surface rather than a separate piece of chrome.
 # Format is 0xAARRGGBB.
 
-BASE=0xff232136     # base - the bar itself, and the digit inside the workspace pill
-TEXT=0xffe0def4     # text - what an item falls back to if it sets no colour
-FOAM=0xff9ccfd8     # foam - memory
-GOLD=0xfff6c177     # gold - cpu
-IRIS=0xffc4a7e7     # iris - volume
+# The bar itself: rose-pine moon base at 0.8 alpha (0xcc), the same opacity
+# WezTerm's window_background_opacity uses, so the bar and the terminal under
+# it are the same material. sketchybarrc pairs it with blur_radius.
+BAR=0xcc232136
 
-# The one colour that is not rose-pine: bordersrc draws the focus ring in
-# Catppuccin blue, and the workspace pill is the same "the keyboard is here"
-# signal, so it has to be the same colour. Change both or neither.
+# Everything drawn on the bar is white. The numbers are the content; colour
+# coding three of them was decoration that had to be learned.
+TEXT=0xffffffff
+
+# The workspace pill. Not white on purpose: bordersrc draws the focus ring in
+# this exact Catppuccin blue, and the pill is the same "the keyboard is here"
+# signal. Change both or neither.
 FOCUS=0xff89b4fa
+# The digit inside that pill. White on #89b4fa is a ~1.9:1 contrast ratio and
+# goes mushy at 13px, so the number stays dark.
+PILL_TEXT=0xff232136

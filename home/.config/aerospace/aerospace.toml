@@ -107,11 +107,12 @@ gaps.outer.left =       16
 # makes vertical splits divide evenly instead of rounding a half pixel.
 # Recheck if AeroSpace is upgraded or a different display is attached.
 gaps.outer.bottom =     15
-# 48, not 16, because SketchyBar's 32px bar sits on top of a usable rect that
-# starts at y=0 (configuration.nix hides the menu bar, so macOS reserves
-# nothing). 32 + 16 lands the visible gap under the bar on 16 like the others.
-# Change this with the bar height in home/.config/sketchybar/sketchybarrc.
-gaps.outer.top =        48
+# 64, not 16, because SketchyBar floats a 32px bar in a usable rect that starts
+# at y=0 (configuration.nix hides the menu bar, so macOS reserves nothing):
+# 16 above the bar + 32 of bar + 16 below it. That puts the same 16px between
+# window and bar as between window and every other screen edge.
+# Change this with the bar height/margin in home/.config/sketchybar/sketchybarrc.
+gaps.outer.top =        64
 gaps.outer.right =      16
 
 # 'main' binding mode declaration
