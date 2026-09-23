@@ -10,20 +10,21 @@
 # width is DOUBLE the ring you actually see. JankyBorders strokes the window
 # frame centred, so the inner half of the stroke sits behind the window and
 # only the outer half is visible. Measured on screen: width=20 paints x=18..27
-# against a window whose content starts at x=28, i.e. exactly half. 10.0 here
-# is the 5px ring the paragraph below is about - do not "correct" it to 5.
+# against a window whose content starts at x=28, i.e. exactly half. So 6.0
+# here is a 3px ring - halve any number in this file to know what you will
+# see, and do not "correct" it to match the prose.
 #
 # Colours are Catppuccin Mocha (blue + overlay0) rather than the rose-pine moon
-# iris the rest of this machine uses: at width 5 the focus ring is furniture,
-# not syntax, so it reads better as a cold accent than as another palette
-# colour. Catppuccin's blue is bright without being saturated, which is what
-# makes a ring this thick bearable to look at all day. Format is 0xAARRGGBB.
+# iris the rest of this machine uses: the focus ring is furniture, not syntax,
+# so it reads better as a cold accent than as another palette colour.
+# Catppuccin's blue is bright without being saturated, which is what keeps it
+# readable at 3px without turning into a highlighter. Format is 0xAARRGGBB.
 # Full option list: https://github.com/FelixKratz/JankyBorders
 # (nixpkgs' jankyborders ships the binary only - there is no man page here.)
 
 options=(
 	style=round
-	width=10.0   # a 5px ring; see the note above
+	width=6.0   # a 3px ring; see the note above
 	# This machine drives a 1920x1080 display at 1:1, so retina drawing is off.
 	# (This makes no measurable difference to the stroke either way.)
 	hidpi=off
