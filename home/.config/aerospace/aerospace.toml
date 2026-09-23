@@ -88,7 +88,14 @@ key-mapping.preset = 'qwerty'
 gaps.inner.horizontal = 12
 gaps.inner.vertical =   12
 gaps.outer.left =       16
-gaps.outer.bottom =     16
+# outer.bottom is 15, not 16, on purpose. AeroSpace 0.21.3-Beta hands out a
+# usable rect one pixel short of the display: with every gap at 0 a lone tiled
+# window measures 1920x1079 on this 1920x1080 screen, and the missing pixel
+# stays at the bottom even with the Dock moved to another edge, so it is not
+# the Dock's reveal strip. 15 here lands the *visible* bottom gap on 16 and
+# makes vertical splits divide evenly instead of rounding a half pixel.
+# Recheck if AeroSpace is upgraded or a different display is attached.
+gaps.outer.bottom =     15
 gaps.outer.top =        16
 gaps.outer.right =      16
 
