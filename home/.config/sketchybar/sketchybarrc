@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# SketchyBar stands in for the macOS menu bar, which configuration.nix hides
+# (`_HIHideMenuBar = true`). Without it the top of the screen carries nothing
+# at all: no clock, and - once AeroSpace is tiling - nothing saying which
+# workspace you are on.
+#
+# home.nix links this directory to ~/.config/sketchybar and starts sketchybar
+# from a launchd agent, so edit the files here, not there. After an edit run
+# `sketchybar --reload`; no rebuild is needed.
+#
+# AeroSpace is not a macOS Spaces manager, so sketchybar's built-in
+# `space_change` event never fires for it. aerospace.toml's
+# exec-on-workspace-change triggers the custom `aerospace_workspace_change`
+# event declared below instead.
+#
+# Full option list: https://felixkratz.github.io/SketchyBar/config/bar
+
+# sketchybar exports CONFIG_DIR - the directory it loaded this file from - and
+# the plugin scripts inherit it, so nothing here has to know where it lives.
+CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/sketchybar}"
+PLUGINS="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/colors.sh"
+
+# The one font this machine installs, and the one with the glyphs the bar needs.
+FONT="Hack Nerd Font"
+
+# height 32 with no y_offset keeps the bar flush against the top edge; this is
+# a 1920x1080 display at 1:1, so vertical space is worth more than a floating
+# bar's margins. aerospace.toml's gaps.outer.top is 32 + 16 to match - change
+# one and change the other.
+sketchybar --bar \
+	height=32 \
+	position=top \
+	sticky=on \
+	padding_left=6 \
+	padding_right=6 \
+	color="$BASE" \
+	shadow=off
+
+sketchybar --default \
+	icon.font="$FONT:Bold:14.0" \
+	icon.color="$TEXT" \
+	icon.padding_left=8 \
+	icon.padding_right=4 \
+	label.font="$FONT:Regular:13.0" \
+	label.color="$TEXT" \
+	label.padding_left=0 \
+	label.padding_right=8 \
+	background.corner_radius=6 \
+	background.height=22 \
+	padding_left=2 \
+	padding_right=2
+
+# --- left: AeroSpace workspaces -------------------------------------------
+
+sketchybar --add event aerospace_workspace_change
+
+# Answering this needs the AeroSpace server running. It is not running at login
+# yet (aerospace.toml still has start-at-login = false), so fall back to the
+# nine workspaces aerospace.toml keeps alive - the bar draws either way.
+workspaces=$(aerospace list-workspaces --all 2>/dev/null)
+[ -n "$workspaces" ] || workspaces=$(seq 1 9)
+
+for sid in $workspaces; do
+	sketchybar --add item "space.$sid" left \
+		--subscribe "space.$sid" aerospace_workspace_change \
+		--set "space.$sid" \
+			icon.drawing=off \
+			label="$sid" \
+			label.font="$FONT:Bold:13.0" \
+			label.color="$MUTED" \
+			label.padding_left=9 \
+			label.padding_right=9 \
+			background.color="$FOCUS" \
+			background.drawing=off \
+			click_script="aerospace workspace $sid" \
+			script="$PLUGINS/aerospace.sh $sid"
+done
+
+# --- left: focused app ----------------------------------------------------
+
+sketchybar --add item front_app left \
+	--subscribe front_app front_app_switched \
+	--set front_app \
+		icon.drawing=off \
+		label.font="$FONT:Bold:13.0" \
+		label.color="$FOAM" \
+		label.padding_left=10 \
+		script="$PLUGINS/front_app.sh"
+
+# --- right: added right to left, so the clock ends up on the edge ----------
+
+sketchybar --add item clock right \
+	--set clock \
+		update_freq=10 \
+		icon="" \
+		icon.color="$GOLD" \
+		label.color="$GOLD" \
+		script="$PLUGINS/clock.sh"
+
+sketchybar --add item volume right \
+	--subscribe volume volume_change \
+	--set volume \
+		icon.color="$IRIS" \
+		label.color="$IRIS" \
+		script="$PLUGINS/volume.sh"
+
+sketchybar --update
+
+# Paint the initial state: the events that normally drive these items only fire
+# on a change, and nothing has changed yet.
+sketchybar --trigger aerospace_workspace_change \
+	FOCUSED_WORKSPACE="$(aerospace list-workspaces --focused 2>/dev/null)"

@@ -18,6 +18,8 @@ in
     neovim
     # the focus ring macOS does not draw, which is what makes AeroSpace legible
     jankyborders
+    # the menu bar this machine hides and then has to draw itself
+    sketchybar
     # tsc typechecks the Calm extension against the installed Pi's types
     # in tests/pi-calm.test.sh
     typescript
@@ -87,6 +89,8 @@ in
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/aerospace/aerospace.toml";
   home.file.".config/borders/bordersrc".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/borders/bordersrc";
+  home.file.".config/sketchybar".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/sketchybar";
   home.file.".claude/settings.json".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/settings.json";
   home.file.".claude/hooks/herdr-agent-state.sh".source =
@@ -119,6 +123,22 @@ in
     config = {
       ProgramArguments = [ "${pkgs.jankyborders}/bin/borders" ];
       EnvironmentVariables.PATH = "${pkgs.jankyborders}/bin:/usr/bin:/bin";
+      RunAtLoad = true;
+      KeepAlive = true;
+    };
+  };
+
+  # configuration.nix hides Apple's menu bar; this draws what belongs there
+  # instead. Same launchd-agent treatment as borders, for the same reason:
+  # `brew services` state would not be a product of this repo.
+  # sketchybarrc and its plugins shell out to `sketchybar` itself and to
+  # `aerospace`, and launchd hands an agent a bare PATH, so both go on it here.
+  launchd.agents.sketchybar = {
+    enable = true;
+    config = {
+      ProgramArguments = [ "${pkgs.sketchybar}/bin/sketchybar" ];
+      EnvironmentVariables.PATH =
+        "${pkgs.sketchybar}/bin:/opt/homebrew/bin:/usr/bin:/bin";
       RunAtLoad = true;
       KeepAlive = true;
     };
