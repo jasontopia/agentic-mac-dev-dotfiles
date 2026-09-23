@@ -88,6 +88,14 @@ in
   home.file.".claude/hooks/herdr-agent-state.sh".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.claude/hooks/herdr-agent-state.sh";
 
+  # Non-identity git config only. Identity lives in ~/.gitconfig, which this
+  # repo does not manage - git reads both files and ~/.gitconfig wins, so the
+  # two sets must stay disjoint.
+  home.file.".config/git/config".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/git/config";
+  home.file.".config/git/ignore".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/git/ignore";
+
   # Link the hand-written baby-menu widgets one directory at a time. The rest of
   # ~/.baby-menu/extensions (hello-world, recipes, AGENTS.md, babymenu-env.d.ts)
   # is Baby Menu's own template, which the app rewrites on launch, so linking the

@@ -1,0 +1,5 @@
+# Global ignores. Per-repo rules belong in that repo's .gitignore.
+
+# Claude Code writes machine-local permission grants here; they are never
+# meant for a shared repo.
+**/.claude/settings.local.json

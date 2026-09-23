@@ -1,0 +1,17 @@
+# Non-identity git config. Identity (user.name / user.email) is deliberately
+# NOT here: this repo is public, and `git config --global user.*` writes to
+# ~/.gitconfig, which stays local. See README's "需要你自己配置的东西".
+#
+# Git reads this file AND ~/.gitconfig, in that order, so anything ~/.gitconfig
+# repeats wins over this file. Keep the two sets disjoint.
+
+[core]
+	# Show CJK filenames as characters instead of \345\255\227 escapes.
+	# Pairs with the UTF-8 locale in home.nix and WezTerm's Sarasa fallback.
+	quotepath = false
+
+[i18n]
+	# Read and write commit messages as UTF-8, so CJK commit text survives
+	# a round trip through `git log`.
+	commitencoding = utf-8
+	logoutputencoding = utf-8
