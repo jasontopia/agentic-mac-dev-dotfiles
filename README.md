@@ -106,6 +106,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | Git 身份 | `git config --global user.name/user.email`，本配置不代管（只有身份不代管；`quotepath`/UTF-8 那些非身份配置在 `home/.config/git/config` 里） |
 | 用户名 | `flake.nix` 里唯一一行 `user = "..."`，`bootstrap.sh` 会提示你改 |
 | Agent 登录 | Claude Code / Codex / Pi 各自首次启动时登录 |
+| Codex 的 `config.toml` | 由 ChatGPT app 自己生成，本仓库不代管（原因见[注意事项](#注意事项)）。唯一需要手动重设的偏好是 `[desktop] followUpQueueMode = "steer"` |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
 | 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
 
@@ -205,6 +206,7 @@ docs/               搭建时的调研笔记
 - 第一次打开 `nvim` 会从 GitHub 拉 lazy.nvim 和插件，需要联网一次，之后可离线使用
 - `home/.claude/hooks/herdr-agent-state.sh` 是 herdr 生成的脚本，入库是为了新机器开箱可用；herdr 升级时会改写它，改动会出现在 `git diff` 里
 - **git 有两个全局配置文件，`~/.gitconfig` 会盖掉仓库版**：git 先读 `~/.config/git/config`（本仓库管），再读 `~/.gitconfig`（本地管身份），后者在冲突时胜出。所以两边的键必须互不重叠：别在 `~/.gitconfig` 里重复写 `quotepath` 之类的东西，否则改仓库不生效
+- **`~/.codex/config.toml` 故意不入库**：它整份都是 ChatGPT app 生成的，不是手写配置 - 里面把 app 自己的版本号（`BROWSER_USE_CODEX_APP_VERSION`）硬编码进去，`marketplaces` 的 source 指向 `~/.codex/.tmp/` 和 `~/.cache/codex-runtimes/`，`mcp_servers.node_repl` 指向 app bundle 内部并带版本号的插件缓存路径。入库会把一个版本钉死，app 一升级就指向失效路径；而且 app 需要写这个文件，`mkOutOfStoreSymlink` 会让它每次升级都往仓库里写 diff。里面唯一是你自己选的是 `[desktop] followUpQueueMode`
 - **Baby Menu 只链自制组件，不链整个 `extensions` 目录**：该目录里的 `hello-world`、`recipes`、`AGENTS.md`、`babymenu-env.d.ts` 是 app 自带模板，每次启动都会被重写，整个目录链上去会和 app 打架
 - flake 的 host 名是 `mac`，改名的话 `flake.nix`、`bootstrap.sh`、`rebuild.sh` 三处都要同步
 - `configuration.nix` 里有一个**只针对 Neovim** 的 overlay：0.12.5 合进了 nixpkgs master 但没有 backport 到 26.05，所以单独从 `nixpkgs-unstable` 取这一个包，其余全部留在 26.05。等 26.05 跟上之后，删掉这个 overlay 和 `flake.nix` 里的 `nixpkgs-unstable` 输入即可
