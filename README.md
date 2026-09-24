@@ -1,6 +1,6 @@
 # Agentic Mac Dev Dotfiles
 
-一套**专为 macOS 打造的 Agentic 开发环境**：用 nix-darwin + home-manager 把系统设置、软件清单、终端、编辑器、以及 AI Agent（Claude Code / Codex / Pi / opencode）的配置全部声明在一个仓库里。
+一套**专为 macOS 打造的 Agentic 开发环境**：用 nix-darwin + home-manager 把系统设置、软件清单、终端、编辑器、以及 AI Agent（Claude Code / Codex，Pi / opencode 为预留）的配置全部声明在一个仓库里。
 
 目标很简单：**一台全新的 Mac，`git clone` 之后跑一次 `./bootstrap.sh`，就得到一台和现在一模一样的机器。**
 
@@ -20,7 +20,7 @@
 |---|---|---|
 | **系统层** | `configuration.nix` | 深色模式、按键重复速度、Dock 自动隐藏、Finder 列表视图、触控板轻点 |
 | **软件层** | `configuration.nix` 的 Homebrew 清单 + `home.nix` 的 Nix 包 | WezTerm、Claude Code、Baby Menu、Chrome/Brave、ChatGPT、ripgrep、fd、fzf、neovim、字体 |
-| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、git、Neovim、WezTerm、herdr、borders、Baby Menu 自制组件、Claude/Codex/Pi 的 agent 配置 |
+| **配置层** | `home.nix` + `home/` 目录 | zsh 别名、starship 提示符、git、Neovim、WezTerm、herdr、borders、Baby Menu 自制组件、Claude/Codex 的 agent 配置（Pi 的配置文件仍在仓库里，预留，默认未启用） |
 
 三层都是**声明式**的：仓库是唯一事实源，机器是它的产物。
 
@@ -47,15 +47,15 @@
 - `Esc` 直接保存，`<leader>f/s/b/e/g` 分别是找文件、搜内容、切 buffer、文件浏览、Git
 
 **Agent 环境（这套配置的重点）**
-- **一份 `home/AGENTS.md` 作为全局 Agent 规范**，通过符号链接同时供给 Claude Code（`~/.claude/CLAUDE.md`）、Codex（`~/.codex/AGENTS.md`）、opencode（`~/.config/opencode/AGENTS.md`）。改一处，三个 agent 同时生效
+- **一份 `home/AGENTS.md` 作为全局 Agent 规范**，通过符号链接同时供给 Claude Code（`~/.claude/CLAUDE.md`）和 Codex（`~/.codex/AGENTS.md`）。改一处，两个 agent 同时生效。opencode（`~/.config/opencode/AGENTS.md`）的链接**预留，默认未启用**
 - Claude Code：dark-ansi 主题、全屏 TUI、状态栏显示当前模型和上下文使用百分比、SessionStart hook 接入 herdr、auto mode 的环境描述
 - herdr 多路复用器：tmux 风格键位（`Ctrl+B` 前缀 + `hjkl` 切 pane），Agents 面板按 space 分组
-- Pi：rose-pine moon 主题、安静启动、折叠思考块、自带 **Calm 扩展**（隐藏内置工具的噪音输出、折叠 thinking、底部一艘慢慢开的小船表示正在工作），以及终端标题状态扩展
+- Pi（**预留，默认未启用**）：rose-pine moon 主题、安静启动、折叠思考块、自带 **Calm 扩展**（隐藏内置工具的噪音输出、折叠 thinking、底部一艘慢慢开的小船表示正在工作），以及终端标题状态扩展。配置文件都还在仓库里，`home.nix` 里的链接已注释，见[预留组件](#预留组件)
 - `cc` / `co` 别名一键进入 Claude Code / Codex 的高权限模式（`co` 保留工作区沙箱）
 
 **可复现性**
 - `flake.lock` 锁死 nixpkgs / nix-darwin / home-manager / nix-homebrew 的版本，今天和半年后 build 出来的是同一套
-- `tests/` 下有 Pi Calm 扩展的完整测试（渲染、生命周期、持久化、隔离 herdr 会话里的真实 TUI 验证）
+- `tests/` 下有 Pi Calm 扩展的完整测试（渲染、生命周期、持久化、隔离 herdr 会话里的真实 TUI 验证）。随 Pi 一起**预留，默认未启用**
 
 ---
 
@@ -105,7 +105,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 |---|---|
 | Git 身份 | `git config --global user.name/user.email`，本配置不代管（只有身份不代管；`quotepath`/UTF-8 那些非身份配置在 `home/.config/git/config` 里） |
 | 用户名 | `flake.nix` 里唯一一行 `user = "..."`，`bootstrap.sh` 会提示你改 |
-| Agent 登录 | Claude Code / Codex / Pi 各自首次启动时登录 |
+| Agent 登录 | Claude Code / Codex 各自首次启动时登录 |
 | Codex 的 `config.toml` | 由 ChatGPT app 自己生成，本仓库不代管（原因见[注意事项](#注意事项)）。唯一需要手动重设的偏好是 `[desktop] followUpQueueMode = "steer"` |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
 | 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
@@ -118,15 +118,15 @@ nix build .#darwinConfigurations.mac.system --dry-run
 
 | 工具 | 安装方式 | 用途 |
 |---|---|---|
-| [pi](https://github.com/earendil-works/pi) | `npm install -g @earendil-works/pi-coding-agent` | Agent harness。`home.nix` 链接的 Pi 主题/扩展/模型配置和 `tests/` 都需要它 |
+| [pi](https://github.com/earendil-works/pi) | `npm install -g @earendil-works/pi-coding-agent` | **预留，当前不装**。Agent harness。`home.nix` 链接的 Pi 主题/扩展/模型配置和 `tests/` 都需要它，这些链接目前是注释掉的，见[预留组件](#预留组件) |
 | [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
 | [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池，装到 `~/.local/bin` |
 | [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁，装到 `~/.local/bin` |
 | gh-axi / chrome-devtools-axi / tasks-axi / quota-axi | `npm install -g <tool>` | firstmate 必需 |
-| lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，可选 |
+| lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，必装 |
 | [gnhf](https://github.com/kunchenguid/gnhf) | `npm install -g gnhf` | 通宵自主迭代 |
 | [backpass](https://github.com/kunchenguid/backpass) | `npm install -g backpass acpx` | 从会话记录训练 `AGENTS.md` |
-| [kun](https://github.com/kunchenguid/kun) | `npx skills add kunchenguid/kun -g -a claude-code -a codex -a opencode -a pi` | `/kun` skill。装进 `~/.agents/skills/`，Claude Code 和 Pi 走符号链接，Codex 和 OpenCode 直接读这个目录 |
+| [kun](https://github.com/kunchenguid/kun) | `npx skills add kunchenguid/kun -g -a claude-code -a codex` | `/kun` skill。装进 `~/.agents/skills/`，Claude Code 走符号链接，Codex 直接读这个目录 |
 
 axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检查 PATH 上的二进制和版本下限。
 在 `~/firstmate` 里跑 `bin/fm-bootstrap.sh`，没有 `MISSING` 输出即表示工具链齐全。
@@ -137,6 +137,25 @@ axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检
 所以它锁不住版本，跑起来也需要联网，这是上游的设计，不是这里的取舍。
 
 `~/.local/bin` 已经由 `home.nix` 加进 PATH。
+
+---
+
+## 预留组件
+
+Pi 和 opencode 目前**不使用**，但相关文件一份都没删，全部留在仓库里：
+
+- `home/.pi/agent/`：Pi 的主题、扩展（含 Calm）、`models.json`、`settings.json`
+- `tests/`：Pi Calm 扩展的测试套件
+- `home/AGENTS.md`：opencode 会读的那份规范本来就是共用的，文件本身一直在
+
+关闭的只是 `home.nix` 里的链接声明，它们被注释掉了（不是删掉）：`.pi/agent/` 的四条链接、
+`.config/opencode/AGENTS.md` 的链接，以及只给 `tests/pi-calm.test.sh` 用的 `typescript` 包。
+
+**重新启用三步：**
+
+1. 取消 `home.nix` 里对应的注释（搜 `预留：Pi / opencode`，一共三处）
+2. 安装 pi：`npm install -g @earendil-works/pi-coding-agent`
+3. 跑 `./rebuild.sh`
 
 ---
 
@@ -168,18 +187,18 @@ flake.lock          实际锁定的 revision
 configuration.nix   系统层：macOS defaults、Homebrew taps/brews/casks
 home.nix            用户层：Nix 包、zsh、starship、环境变量、所有符号链接
 home/               真实的配置文件，被链接到 ~ 下
-  AGENTS.md           全局 Agent 规范（Claude / Codex / opencode 共用）
+  AGENTS.md           全局 Agent 规范（Claude / Codex 共用；opencode 预留）
   .config/nvim/       Neovim + lazy.nvim
   .config/wezterm/    WezTerm
   .config/herdr/      herdr 键位与 UI
   .config/borders/    JankyBorders 焦点边框
   .config/git/        非身份的 git 配置 + 全局 ignore
   .claude/            Claude Code 设置与 hook
-  .pi/agent/          Pi 主题、扩展、模型覆盖
+  .pi/agent/          Pi 主题、扩展、模型覆盖（预留，默认未启用）
   .baby-menu/         Baby Menu 自制组件（claude-code-quota、system-usage）
 bootstrap.sh        新机器一次性初始化
 rebuild.sh          日常 switch
-tests/              Pi Calm 扩展的测试
+tests/              Pi Calm 扩展的测试（预留，默认未启用）
 docs/               搭建时的调研笔记
 ```
 
