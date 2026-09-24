@@ -119,7 +119,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | 工具 | 安装方式 | 用途 |
 |---|---|---|
 | [pi](https://github.com/earendil-works/pi) | `npm install -g @earendil-works/pi-coding-agent` | **预留，当前不装**。Agent harness。`home.nix` 链接的 Pi 主题/扩展/模型配置和 `tests/` 都需要它，这些链接目前是注释掉的，见[预留组件](#预留组件) |
-| [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
+| [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用。**路径固定在 `~/firstmate`**，装完还要配一次 backend，见[下面的小节](#firstmate-装在-firstmate) |
 | [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池，装到 `~/.local/bin` |
 | [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁，装到 `~/.local/bin` |
 | gh-axi / chrome-devtools-axi | `npm install -g <tool> && <tool> setup hooks` | firstmate 必需。这两个装完还要各跑一次 `setup hooks` |
@@ -136,10 +136,24 @@ lavish-axi 版本不够时报的是 `PRESENTATION_UNAVAILABLE` 而不是 `MISSIN
 但用 Lavish 之前必须先升上去。
 在 firstmate 之外，也可以用 `npx skills add kunchenguid/<tool> --skill <skill> -g` 把它们装成 Agent Skill。
 
-`fm-bootstrap.sh` 报的 `MISSING` 跟随**已解析的 runtime backend**，不是一份固定清单。
-默认 backend 是 tmux，所以在普通终端里跑它会报 `MISSING: tmux`。本仓库用 herdr，
-在 `~/firstmate/config/backend` 里写一行 `herdr`（该文件被 firstmate 自己 gitignore）之后
-这条就会消失，herdr 另外要求 protocol ≥ 14 和 `jq`（`jq` 已在 `home.nix` 的 `home.packages` 里）。
+### firstmate 装在 `~/firstmate`
+
+firstmate 是一个 git 仓库，不是可安装的包，**本仓库既不声明也不 vendor 它**。
+`~/firstmate` 是约定位置：上游文档、本 README、以及 `~/.claude` 里的相关约定都按这个路径写。
+换别的目录也能跑，但本仓库的说明就对不上了。
+
+```sh
+git clone https://github.com/kunchenguid/firstmate ~/firstmate
+echo herdr > ~/firstmate/config/backend   # 见下，本机用 herdr 而不是默认的 tmux
+cd ~/firstmate && bin/fm-bootstrap.sh     # 零输出 = 工具链齐全
+```
+
+之后在 `~/firstmate` 里启动 `claude` 使用。升级就是 `git pull`。
+
+**为什么要写 `config/backend`**：`fm-bootstrap.sh` 报的 `MISSING` 跟随**已解析的 runtime backend**，
+不是一份固定清单。默认 backend 是 tmux，所以不配的话在普通终端里跑它会报 `MISSING: tmux` -
+而本机用 herdr，不装 tmux。写完这一行那条就消失了。该文件被 firstmate 自己 gitignore，不会污染它的仓库。
+herdr 另外要求 protocol ≥ 14 和 `jq`（`jq` 已在 `home.nix` 的 `home.packages` 里）。
 在 herdr pane 里启动时 firstmate 靠 `HERDR_ENV=1` 自动探测，不写这个文件也能走对；
 写了是为了从任何地方启动都一致。
 
