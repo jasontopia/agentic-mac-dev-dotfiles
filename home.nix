@@ -23,6 +23,13 @@ in
     typescript
     # the font everything renders in
     nerd-fonts.hack
+    # CJK fallback for WezTerm. Deliberately the Nixpkgs package rather than the
+    # font-sarasa-gothic Homebrew cask: that cask installs one 831MB
+    # Sarasa-SuperTTC.ttc holding every family at once, and macOS 26's fontd
+    # chokes on it and then registers *nothing* from ~/Library/Fonts - taking
+    # Hack down with it, so WezTerm fell back to its built-in font. Nixpkgs
+    # ships the same faces split one TTC per weight, which registers fine.
+    sarasa-gothic
   ];
   fonts.fontconfig.enable = true;
   home.sessionVariables = {

@@ -64,7 +64,6 @@
     casks = [
       "wezterm"
       "claude-code"
-      "font-sarasa-gothic"  # CJK fallback font for WezTerm
       "kunchenguid/tap/baby-menu"
       # GUI apps that were installed by hand until now. They are not in Nixpkgs
       # as macOS apps, and being outside Homebrew meant `zap` could not see them

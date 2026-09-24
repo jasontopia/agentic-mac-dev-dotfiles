@@ -89,7 +89,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 
 这几条会咬人，先看完再跑：
 
-- **Homebrew 会被清理**：`onActivation.cleanup = "zap"`，没写进 `configuration.nix` 的 Homebrew 包会被卸载。neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font 这些改由 Nix 提供，brew 版被卸掉是预期行为
+- **Homebrew 会被清理**：`onActivation.cleanup = "zap"`，没写进 `configuration.nix` 的 Homebrew 包会被卸载。neovim、starship、ripgrep、fd、zsh-autosuggestions、Hack Nerd Font、更纱黑体这些改由 Nix 提供，brew 版被卸掉是预期行为
 - **链接目标不能是已存在的真实文件**：home-manager 不会覆盖已有的文件或文件夹。如果 `~/.config/herdr`、`~/.config/wezterm`、`~/.zshrc`、`~/.config/git/config`、`~/.config/git/ignore`、`~/.baby-menu/extensions/{claude-code-quota,system-usage}` 已经是真实文件，先移走再 switch。herdr 启动时会自己创建 `~/.config/herdr`，所以第一次 switch 前先退出 herdr
 - **Claude Code 只走 Homebrew cask**：不要用 `npm install -g @anthropic-ai/claude-code`，它会占住 `/opt/homebrew/bin/claude` 导致 cask 安装失败
 - **已经手动装过的 GUI 应用会被 cask 接管**：Chrome、Brave、ChatGPT、Typeless、UURemote 如果已经在 `/Applications` 里，cask 安装默认会因为「App 已存在」而失败。`onActivation.extraFlags = [ "--force" ]` 正是为此存在，第一次 switch 时 brew 会直接接管它们
