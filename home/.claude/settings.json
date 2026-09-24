@@ -48,6 +48,9 @@
     "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); used=$(echo \"$input\" | jq -r '.context_window.used_percentage // empty'); if [ -n \"$used\" ]; then printf \"%s | ctx: %.0f%% used\" \"$model\" \"$used\"; else printf \"%s\" \"$model\"; fi"
   },
   "tui": "fullscreen",
+  "permissions": {
+    "defaultMode": "auto"
+  },
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-ansi",
   "autoMode": {
@@ -62,7 +65,7 @@
       "**CI/CD deploy targets**: None configured",
       "**Network posture**: None configured",
       "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine or CI runner with open internet",
-      "**Source control**: The trusted repo (jasontopia/agentic-mac-dev-dotfiles) and its origin remote only (no additional orgs configured)",
+      "**Source control**: every repository under the personal GitHub account github.com/jasontopia is trusted, pushes to its origin remotes included; some of those repositories are public, so a push to a public one is publishing. Repositories under the upstream account github.com/kunchenguid are read and clone only - never push to them",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: None configured",
@@ -73,8 +76,7 @@
       "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
-      "**Primary use of Claude Code**: personal dotfiles / Mac system configuration management (nix-darwin, home-manager)",
-      "**Trusted repo**: jasontopia/agentic-mac-dev-dotfiles (public) at ~/.dotfiles and its origin remote (github.com:jasontopia/agentic-mac-dev-dotfiles.git) — since public, only this repo's own work belongs here; confidential/secret material is never cleared into it by visibility",
+      "**Primary use of Claude Code**: personal software projects and Mac development-environment configuration (nix-darwin / home-manager); multi-agent orchestration through firstmate, whose crew members work in treehouse worktrees under ~/firstmate",
       "**Org-specific CLIs**: None configured"
     ]
   }
