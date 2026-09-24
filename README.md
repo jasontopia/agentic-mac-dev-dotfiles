@@ -122,15 +122,26 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | [firstmate](https://github.com/kunchenguid/firstmate) | `git clone https://github.com/kunchenguid/firstmate ~/firstmate` | Agent distro，在该目录里启动 `claude` 使用 |
 | [treehouse](https://github.com/kunchenguid/treehouse) | `curl -fsSL https://kunchenguid.github.io/treehouse/install.sh \| sh` | Git worktree 池，装到 `~/.local/bin` |
 | [no-mistakes](https://github.com/kunchenguid/no-mistakes) | `curl -fsSL https://raw.githubusercontent.com/kunchenguid/no-mistakes/main/docs/install.sh \| sh` | Push 前的验证门禁，装到 `~/.local/bin` |
-| gh-axi / chrome-devtools-axi / tasks-axi / quota-axi | `npm install -g <tool>` | firstmate 必需 |
-| lavish-axi | `npm install -g lavish-axi` | 可视化 HTML artifact，必装 |
+| gh-axi / chrome-devtools-axi | `npm install -g <tool> && <tool> setup hooks` | firstmate 必需。这两个装完还要各跑一次 `setup hooks` |
+| tasks-axi / quota-axi | `npm install -g <tool>` | firstmate 必需。不需要 `setup hooks` |
+| lavish-axi | `npm install -g lavish-axi && lavish-axi setup hooks` | 可视化 HTML artifact，必装。**版本下限 0.1.77**，低于这个版本 bootstrap 会报 `PRESENTATION_UNAVAILABLE` |
 | [gnhf](https://github.com/kunchenguid/gnhf) | `npm install -g gnhf` | 通宵自主迭代 |
 | [backpass](https://github.com/kunchenguid/backpass) | `npm install -g backpass acpx` | 从会话记录训练 `AGENTS.md` |
 | [kun](https://github.com/kunchenguid/kun) | `npx skills add kunchenguid/kun -g -a claude-code -a codex` | `/kun` skill。装进 `~/.agents/skills/`，Claude Code 走符号链接，Codex 直接读这个目录 |
 
 axi 系列必须全局安装，因为 firstmate 的 `bin/fm-bootstrap.sh` 会检查 PATH 上的二进制和版本下限。
 在 `~/firstmate` 里跑 `bin/fm-bootstrap.sh`，没有 `MISSING` 输出即表示工具链齐全。
+它的输出本身就带安装命令，照抄即可 - 上表的 `setup hooks` 和 lavish-axi 的版本下限都是从那里来的。
+lavish-axi 版本不够时报的是 `PRESENTATION_UNAVAILABLE` 而不是 `MISSING`：非可视化的工作照常进行，
+但用 Lavish 之前必须先升上去。
 在 firstmate 之外，也可以用 `npx skills add kunchenguid/<tool> --skill <skill> -g` 把它们装成 Agent Skill。
+
+`fm-bootstrap.sh` 报的 `MISSING` 跟随**已解析的 runtime backend**，不是一份固定清单。
+默认 backend 是 tmux，所以在普通终端里跑它会报 `MISSING: tmux`。本仓库用 herdr，
+在 `~/firstmate/config/backend` 里写一行 `herdr`（该文件被 firstmate 自己 gitignore）之后
+这条就会消失，herdr 另外要求 protocol ≥ 14 和 `jq`（`jq` 已在 `home.nix` 的 `home.packages` 里）。
+在 herdr pane 里启动时 firstmate 靠 `HERDR_ENV=1` 自动探测，不写这个文件也能走对；
+写了是为了从任何地方启动都一致。
 
 `/kun` 的 `SKILL.md` 只有 1 KB，是个壳：每次调用时才从 `raw.githubusercontent.com` 拉 Kun 的 living docs
 （`ENTRY.md` / `TOOLS.md` / `OPINIONS.md` / `VOICE.md`）再照着执行，而那几份文档每天自动重新生成。
