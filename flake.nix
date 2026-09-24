@@ -22,7 +22,7 @@
     let
       # The one username line to change if this isn't your machine.
       # bootstrap.sh offers to rewrite this for you if your macOS username differs.
-      user = "admin";
+      user = "caishen";
     in
     {
       darwinConfigurations."mac" = nix-darwin.lib.darwinSystem {
