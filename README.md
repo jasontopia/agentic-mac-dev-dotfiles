@@ -108,6 +108,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | Agent 登录 | Claude Code / Codex 各自首次启动时登录 |
 | Codex 的 `config.toml` | 由 ChatGPT app 自己生成，本仓库不代管（原因见[注意事项](#注意事项)）。唯一需要手动重设的偏好是 `[desktop] followUpQueueMode = "steer"` |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
+| firstmate 后端 | `echo herdr > ~/firstmate/config/backend`。firstmate 默认用 tmux，本机没装 tmux；该文件被 firstmate 的 `.gitignore` 忽略，新机器需要手动创建 |
 | 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
 
 ---
@@ -253,6 +254,7 @@ docs/               搭建时的调研笔记
 - **`~/.codex/config.toml` 故意不入库**：它整份都是 ChatGPT app 生成的，不是手写配置 - 里面把 app 自己的版本号（`BROWSER_USE_CODEX_APP_VERSION`）硬编码进去，`marketplaces` 的 source 指向 `~/.codex/.tmp/` 和 `~/.cache/codex-runtimes/`，`mcp_servers.node_repl` 指向 app bundle 内部并带版本号的插件缓存路径。入库会把一个版本钉死，app 一升级就指向失效路径；而且 app 需要写这个文件，`mkOutOfStoreSymlink` 会让它每次升级都往仓库里写 diff。里面唯一是你自己选的是 `[desktop] followUpQueueMode`
 - **Codex 侧的 axi hook 开关也寄存在那份不入库的 `config.toml` 里**：`gh-axi` / `chrome-devtools-axi` / `lavish-axi` 的 `setup hooks` 会把 hook 本体写进 `~/.codex/hooks.json`，但启用它们的 `[features] hooks = true` 写在 `~/.codex/config.toml`。既然那个文件由 ChatGPT app 自己重写，app 升级有可能把这个开关冲掉，Codex 的 axi ambient context 会**静默失效**（Claude Code 侧不受影响，它的 hook 在本仓库管的 `home/.claude/settings.json` 里）。app 升级后如果发现 Codex 少了 axi 上下文，重跑一次那三条 `setup hooks` 即可
 - **Baby Menu 只链自制组件，不链整个 `extensions` 目录**：该目录里的 `hello-world`、`recipes`、`AGENTS.md`、`babymenu-env.d.ts` 是 app 自带模板，每次启动都会被重写，整个目录链上去会和 app 打架
+- **`onActivation.autoUpdate = true` 只刷新 Homebrew 索引，不升级已安装的包**：升级由 nix-darwin 的 `onActivation.upgrade` 控制，本配置保持默认 `false`，所以 switch 实际执行的是 `brew bundle ... --no-upgrade --zap`，重复 switch 幂等。需要新版时手动 `brew upgrade <包名>`；已声明的包升级后不会被 zap 掉，zap 只删没写进 `configuration.nix` 的包
 - flake 的 host 名是 `mac`，改名的话 `flake.nix`、`bootstrap.sh`、`rebuild.sh` 三处都要同步
 - `configuration.nix` 里有一个**只针对 Neovim** 的 overlay：0.12.5 合进了 nixpkgs master 但没有 backport 到 26.05，所以单独从 `nixpkgs-unstable` 取这一个包，其余全部留在 26.05。等 26.05 跟上之后，删掉这个 overlay 和 `flake.nix` 里的 `nixpkgs-unstable` 输入即可
 
