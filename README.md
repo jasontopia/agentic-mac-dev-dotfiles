@@ -109,6 +109,7 @@ nix build .#darwinConfigurations.mac.system --dry-run
 | Codex 的 `config.toml` | 由 ChatGPT app 自己生成，本仓库不代管（原因见[注意事项](#注意事项)）。唯一需要手动重设的偏好是 `[desktop] followUpQueueMode = "steer"` |
 | Agent 工具链 | 见下一节，按官方方式从上游安装 |
 | firstmate 后端 | `echo herdr > ~/firstmate/config/backend`。firstmate 默认用 tmux，本机没装 tmux；该文件被 firstmate 的 `.gitignore` 忽略，新机器需要手动创建 |
+| firstmate 船员权限 | `echo auto > ~/firstmate/config/claude-permission-mode`，让 Claude 船员以 auto mode 启动；该文件被 firstmate 的 `.gitignore` 忽略，新机器需要手动创建 |
 | 本地密钥 | `.env` 已被 gitignore，不要往仓库里放 |
 
 ---
