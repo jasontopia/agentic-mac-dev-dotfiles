@@ -4,6 +4,8 @@ home/.config/herdr/session.json
 home/.config/herdr/*.sock
 home/.config/herdr/.plugins.lock
 home/.config/herdr/release-notes.json
+home/.config/herdr/session-snapshots/
+home/.config/herdr/*.sock.agent
 # disposable herdr sessions created by tests/pi-calm.test.sh
 home/.config/herdr/sessions/
 

@@ -34,10 +34,9 @@ HERDR_TEST_SESSION="picalm$$"
 
 cleanup() {
   if command -v herdr >/dev/null 2>&1; then
-    HERDR_SESSION="$HERDR_TEST_SESSION" herdr session stop "$HERDR_TEST_SESSION" \
+    herdr --session "$HERDR_TEST_SESSION" session stop "$HERDR_TEST_SESSION" \
       >/dev/null 2>&1 || true
-    HERDR_SESSION="$HERDR_TEST_SESSION" herdr session delete "$HERDR_TEST_SESSION" \
-      >/dev/null 2>&1 || true
+    herdr session delete "$HERDR_TEST_SESSION" >/dev/null 2>&1 || true
     # herdr roots session directories under its config directory, which this
     # repo owns through a Home Manager symlink. Drop the directory once it is
     # empty so a test run leaves nothing untracked behind.
@@ -602,7 +601,11 @@ test_real_pi_tui_smoke() {
 
   # Every herdr call in this proof targets the disposable session, never the
   # developer's live one.
-  hd() { HERDR_SESSION="$HERDR_TEST_SESSION" herdr "$@"; }
+  # --session is what selects a session's own socket. The HERDR_SESSION
+  # environment variable is not read by herdr 0.9.1 and silently fell through
+  # to the developer's live default server, which then refused to start a
+  # second one.
+  hd() { herdr --session "$HERDR_TEST_SESSION" "$@"; }
 
   read_pane() {
     # Recent scrollback, not just the viewport: a long transcript can push the
@@ -669,7 +672,7 @@ TS
 
   # A private headless server keeps this proof off the developer's live herdr
   # session: its own socket, its own workspace, torn down by cleanup.
-  HERDR_SESSION="$HERDR_TEST_SESSION" herdr server >"$fixture/herdr-server.log" 2>&1 &
+  hd server >"$fixture/herdr-server.log" 2>&1 &
   for i in $(seq 1 200); do
     hd session list 2>/dev/null | grep -Eq "^$HERDR_TEST_SESSION[[:space:]]+running" && break
     sleep 0.05

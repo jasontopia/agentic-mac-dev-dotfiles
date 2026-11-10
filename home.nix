@@ -18,10 +18,9 @@ in
     neovim
     # the focus ring macOS does not draw
     jankyborders
-    # 预留：Pi / opencode 暂未启用。恢复时取消注释并 ./rebuild.sh
     # tsc typechecks the Calm extension against the installed Pi's types
     # in tests/pi-calm.test.sh
-    # typescript
+    typescript
     # the font everything renders in
     nerd-fonts.hack
     # CJK fallback for WezTerm. Deliberately the Nixpkgs package rather than the
@@ -129,22 +128,27 @@ in
   home.file.".baby-menu/extensions/system-usage".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.baby-menu/extensions/system-usage";
 
-  # 预留：Pi / opencode 暂未启用。恢复时取消注释并 ./rebuild.sh
-  # Keep Pi's credential and runtime state local by linking only authored files and directories.
-  # home.file.".pi/agent/themes".source =
-  #   config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/themes";
-  # home.file.".pi/agent/extensions".source =
-  #   config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/extensions";
-  # home.file.".pi/agent/models.json".source =
-  #   config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/models.json";
-  # home.file.".pi/agent/settings.json".source =
-  #   config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/settings.json";
+  # Keep Pi's credential and runtime state local by linking only authored files
+  # and directories. auth.json, trust.json, sessions and the packages Pi
+  # installs from the `packages` list in settings.json all stay out of the repo.
+  home.file.".pi/agent/themes".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/themes";
+  home.file.".pi/agent/extensions".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/extensions";
+  home.file.".pi/agent/models.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/models.json";
+  home.file.".pi/agent/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.pi/agent/settings.json";
 
   home.file.".claude/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".codex/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
-  # 预留：Pi / opencode 暂未启用。恢复时取消注释并 ./rebuild.sh
+  # Pi reads the agent directory's AGENTS.md as user-level instructions, so the
+  # same shared file covers a third harness.
+  home.file.".pi/agent/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  # 预留：opencode 暂未启用。恢复时取消注释并 ./rebuild.sh
   # home.file.".config/opencode/AGENTS.md".source =
   #   config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
 

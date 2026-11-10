@@ -50,6 +50,7 @@
     onActivation.extraFlags = [ "--force" ];
     taps = [
       "kunchenguid/tap"
+      "stripe/stripe-cli"
     ];
     brews = [
       "herdr"
@@ -60,6 +61,15 @@
       # language toolchains I still use directly
       "go"
       "pnpm"
+      # In use but installed by hand. `zap` removes whatever is not listed, so
+      # each one has to stay here: cloudflared carries the voice bridge tunnel.
+      "cloudflared"
+      "cog"
+      "colima"
+      "docker"
+      "ffmpeg"
+      "stripe/stripe-cli/stripe"
+      "whisper.cpp"
     ];
     casks = [
       "wezterm"
@@ -73,6 +83,8 @@
       "chatgpt"       # also provides the Codex CLI at Contents/Resources/codex
       "typeless"      # voice dictation; runs as a login item
       "uuremote"
+      "kunchenguid/tap/firstmate-3000"
+      "tailscale-app"  # the Mac's link to wsl-dev runs over Tailscale
     ];
   };
 }
